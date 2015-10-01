@@ -378,7 +378,7 @@ typedef struct {
 //} MOTE_PACKET;
 //
 
-typedef struct {
+struct bldcMeasure {
 	//7 Values int16_t not read(14 byte)
 	float avgMotorCurrent;
 	float avgInputCurrent;
@@ -390,5 +390,5 @@ typedef struct {
 	//2 values int32_t not read (8 byte)
 	long tachometer;
 	long tachometerAbs;
-}	bldcMeasure;
+}	;
 #endif /* DATATYPES_H_ */
