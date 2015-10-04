@@ -9,7 +9,7 @@
 //Include libraries copied from VESC
  #include "VescUart.h"
 #include "datatypes.h"
-bool messageReceived = false;
+
 
 #define DEBUG
 
