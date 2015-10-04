@@ -9,11 +9,15 @@
 #include <SPI.h>
 
 //Using the nRF34 library from https://github.com/TMRh20/RF24
+#include "Config_TX.h"
 #include "nRF24L01.h"
 #include "RF24.h"
-
+#include "datatypes.h"
+#ifdef DEBUG
+#include "VescUart.h" //SerialPrint for received Data Package
+#endif
 #include "printf.h"
-#include "Config.h"
+
 
 
 //
@@ -25,55 +29,43 @@
 RF24 radio(9,10);
 
 remotePackage remPack;
+struct bldcMeasure VescMeasuredValues;
 
 long failedCounter = 0;
 boolean sendOK = false;
+boolean recOK = false;
 
 void setup()
 {
 	Serial.begin(9600);
 	Serial.println("Tx Started");
 	radio.begin();
+	radio.enableAckPayload();
+	radio.enableDynamicPayloads();
 	radio.openWritingPipe(pipe);
 	remPack.valLowerButton = 0;
 	remPack.valUpperButton = 1;
-	
-
-	//Serial.begin(9600);
-	//printf_begin();
-	//
-	//radio.begin();
-	//radio.openWritingPipe(pipe);
-	//
-		//
-	//
-	////initialize remPack
-	//
-	//remPack.valXJoy			= 512; //middle Position
-	//remPack.valYJoy			= 512;
-	//remPack.valLowerButton	= 0;
-	//remPack.valLowerButton	= 0;
-	//
-	//#ifdef debug
-	//
-	//// radio.printDetails();
-	//// Serial.print("Package Size = "); Serial.println(sizeof(remPack));
-	//
-	//#endif
-	
+		
 }
 
 void loop()
 {
-
-
+//read iputs
   remPack.valXJoy = analogRead(JOY_X);
   remPack.valYJoy = analogRead(JOY_Y);
-  
- 
+
+  //send data via radio to RX
   sendOK = radio.write( &remPack, sizeof(remPack) );
-  
-  #ifdef debug
+
+  //read Acknowledegement message from RX
+
+  while (radio.isAckPayloadAvailable())
+  {
+	  radio.read(&VescMeasuredValues, sizeof(VescMeasuredValues));
+	  recOK = true;
+
+  }
+  #ifdef DEBUG
 if (sendOK)
   {
 	Serial.print("X= "); Serial.print(remPack.valXJoy);Serial.print(" Y= "); Serial.println(remPack.valYJoy);
@@ -86,6 +78,12 @@ if (sendOK)
   //Serial.println("Send failed!");
   failedCounter++;
   }
+
+if (recOK)
+{
+	Serial.println("Received values from Vesc:");
+	SerialPrint(VescMeasuredValues);
+}
 #endif
 	
 	delay(500);

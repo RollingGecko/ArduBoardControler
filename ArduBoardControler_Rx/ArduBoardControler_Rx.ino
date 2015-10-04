@@ -11,82 +11,88 @@
 //Using the nRF34 library from https://github.com/TMRh20/RF24
 #include "nRF24L01.h"
 #include "RF24.h"
-
 #include "printf.h"
-#include "Config.h"
 
+#include "Config_RX.h"
 
-RF24 radio(9,10);
+//Library for VESC UART
+#include "VescUart.h"
+#include "datatypes.h"
+
+RF24 radio(CEPIN,CSPIN);
 
 //Define Remote Package
 
 remotePackage remPack;
 bool recOK = true;
 
+struct bldcMeasure VescMeasuredValues;
+
 void setup()
 {
 	
-	  Serial.begin(9600);
+	#ifdef DEBUG
+	  DEBUGSERIAL.begin(115200);
+	#endif
+	  //Initial for Radio
+	  SERIALIO.begin(115200);
 	  delay(1000);
 	  Serial.println("Nrf24L01 Receiver Starting");
 	  radio.begin();
+	  radio.enableAckPayload();
+	  radio.enableDynamicPayloads();
 	  radio.openReadingPipe(1,pipe);
+
 	  radio.startListening();
-	#ifdef debug
+	#ifdef DEBUG
 	
 	radio.printDetails();
 	
 	#endif
+
+	// For initial start 
 	
 		remPack.valXJoy			= 512; //middle Position
 		remPack.valYJoy			= 512;
 		remPack.valLowerButton	= 0;
 		remPack.valLowerButton	= 0;
-	
 }
 
 void loop()
 {
-		
+	//Getting Values from Vesc over UART
+
+	if (VescUartGetValue(VescMeasuredValues)) {
+		SerialPrint(VescMeasuredValues);
+	}
+	else
+	{
+		Serial.println("Failed to get data!");
+	}
+
+	//writing package to TX in AckPayload
+	//data will be send with next acknowledgement to TX
+
+	radio.writeAckPayload(pipe, &VescMeasuredValues, sizeof(VescMeasuredValues));
+	
+	//Get data from TX	
 	while (radio.available())
 	{
-	//	Serial.println("Available");
 		radio.read(&remPack, sizeof(remPack));
 		recOK = true;
 	}
-		#ifdef debug
+	#ifdef DEBUG
 					
-		if (recOK == true)
-		{
-			Serial.println("Received successfully!");
-			Serial.println("recieved package: ");
-			Serial.print("valXJoy = "); Serial.print(remPack.valXJoy); Serial.print(" valYJoy = "); Serial.println(remPack.valYJoy);
-			Serial.print("LowerButton = ");Serial.print(remPack.valLowerButton); Serial.print(" UpperButton = "); Serial.println(remPack.valUpperButton);
-			//Serial.print("Failed= ");Serial.println(failedCounter);
-			recOK = false;
-			
-		}
-		#endif
-		
-	//if ( radio.available() )
-	//{
-		//// Serial.println("Radio available");
-		//// Read the data payload until we've received everything
-		//bool done = false;
-		//while (!done)
-		//{
-			//// Fetch the data payload
-			//done = radio.read( &remPack, sizeof(remPack) );
-			//Serial.print("X = ");
-			//Serial.print(remPack.valXJoy);
-			//Serial.print(" Y = ");
-			//Serial.println(remPack.valYJoy);
-		//}
-	//}
-	//else
-	//{
-		//Serial.println("No radio available");
-		//
-		//
-	//}
+	if (recOK == true)
+	{
+		Serial.println("Received successfully!");
+		Serial.println("recieved package: ");
+		Serial.print("valXJoy = "); Serial.print(remPack.valXJoy); Serial.print(" valYJoy = "); Serial.println(remPack.valYJoy);
+		Serial.print("LowerButton = ");Serial.print(remPack.valLowerButton); Serial.print(" UpperButton = "); Serial.println(remPack.valUpperButton);
+		recOK = false;
+	}
+	#endif
+	
+	
+	
 }
