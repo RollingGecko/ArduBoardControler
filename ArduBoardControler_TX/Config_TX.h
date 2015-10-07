@@ -18,7 +18,7 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 //Pin definition
 
 //**for Mega2560
-#ifdef __AVR_ATmega2560__
+#ifdef __AVR_ATmega2560__ 
 
 #define JOY_X				A0
 #define JOY_Y				A1
@@ -27,15 +27,15 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 #endif
 
-//**for Arduino Micro
+//**for Arduino ATmega328p (Nano)
 
-#ifdef ARDUINO_AVR_MICRO
-
+#ifdef ARDUINO_AVR_NANO
 #define JOY_X				A0
 #define JOY_Y				A1
 #define UPPER_BUTTON		6	
 #define LOWER_BUTTON		5
-
+#define DEBUGSERIAL Serial
+#define SERIALIO Serial
 #endif
 
 #define DEBUG

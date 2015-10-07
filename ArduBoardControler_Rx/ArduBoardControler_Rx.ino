@@ -63,7 +63,7 @@ void loop()
 	//Getting Values from Vesc over UART
 
 	if (VescUartGetValue(VescMeasuredValues)) {
-		SerialPrint(VescMeasuredValues);
+		//SerialPrint(VescMeasuredValues);
 	}
 	else
 	{
