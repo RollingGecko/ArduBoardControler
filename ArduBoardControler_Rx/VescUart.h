@@ -62,5 +62,9 @@ void SerialPrint(uint8_t* data, int len);
 //@return true if sucess
 bool VescUartGetValue(struct bldcMeasure& values);
 
+void VescUartSetCurrent(float current);
+
+void VescUartSetCurrentBrake(float brakeCurrent);
+
 #endif
 

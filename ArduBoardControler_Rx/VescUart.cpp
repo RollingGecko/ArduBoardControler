@@ -188,6 +188,25 @@ bool VescUartGetValue(bldcMeasure& values) {
 	}
 }
 
+void VescUartSetCurrent(float current) {
+	int index = 0;
+	uint8_t payload[3];
+		
+	payload[index++] = COMM_SET_CURRENT ;
+	buffer_append_int16(payload, (int)(current * 1000), &index);
+	PackSendPayload(payload, 3);
+}
+
+void VescUartSetCurrentBrake(float brakeCurrent) {
+	int index = 0;
+	uint8_t payload[3];
+
+	payload[index++] = COMM_SET_CURRENT_BRAKE;
+	buffer_append_int16(payload, (int)(brakeCurrent * 1000), &index);
+	PackSendPayload(payload, 3);
+
+}
+
 void SerialPrint(uint8_t* data, int len) {
 
 	//	DEBUGSERIAL.print("Data to display: "); DEBUGSERIAL.println(sizeof(data));

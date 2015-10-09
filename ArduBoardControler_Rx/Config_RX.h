@@ -39,12 +39,14 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 //Definition of Serial ports
 #define SERIALIO Serial
-
-
 #endif
 
 #define DEBUG
 
+//Setting for current control
+
+#define DEADBAND_POS 5
+#define DEADBAND_NEG -5
 //Define remote Package
 
 struct remotePackage {

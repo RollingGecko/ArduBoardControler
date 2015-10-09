@@ -5,6 +5,7 @@
  * Author: AC
  */ 
 
+
 #include <SPI.h>
 
 
@@ -27,6 +28,8 @@ remotePackage remPack;
 bool recOK = true;
 
 struct bldcMeasure VescMeasuredValues;
+
+int8_t persXJoy = 0;
 
 void setup()
 {
@@ -82,6 +85,23 @@ void loop()
 		recOK = true;
 	}
 	#ifdef DEBUG
+
+	//Read the remote controls and control Vesc
+	//Read the x-joystick and controls motor current and break
+
+	//transform values read to int
+
+	persXJoy = map(remPack.valXJoy, 0, 1023, -100, 100);
+
+	if (persXJoy > DEADBAND_POS )
+	{
+		Serial.println("Throttle");
+	}
+	else if (persXJoy < DEADBAND_NEG) 
+	{
+		Serial.println("Break");
+	}
+
 					
 	if (recOK == true)
 	{
