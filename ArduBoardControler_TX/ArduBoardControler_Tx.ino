@@ -86,5 +86,5 @@ if (recOK)
 }
 #endif
 	
-	delay(500);
+	delay(20);
 }

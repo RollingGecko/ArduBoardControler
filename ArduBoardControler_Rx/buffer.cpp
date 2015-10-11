@@ -24,7 +24,7 @@
 
 #include "buffer.h"
 
-void buffer_append_int16(uint8_t* buffer, int16_t number, uint32_t *index) {
+void buffer_append_int16(uint8_t* buffer, int16_t number, int *index) {
 	buffer[(*index)++] = number >> 8;
 	buffer[(*index)++] = number;
 }

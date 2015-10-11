@@ -10,7 +10,7 @@
 
 
 //Using the nRF34 library from https://github.com/TMRh20/RF24
-#include "nRF24L01.h"
+#include <nRF24L01.h>
 #include "RF24.h"
 #include "printf.h"
 
@@ -91,15 +91,25 @@ void loop()
 
 	//transform values read to int
 
-	persXJoy = map(remPack.valXJoy, 0, 1023, -100, 100);
+	persXJoy = map(remPack.valXJoy, 0, 1024, -100, 100);
+
+	Serial.println(persXJoy);
 
 	if (persXJoy > DEADBAND_POS )
 	{
+		VescUartSetCurrent(((float)persXJoy / 100) * 40.0);
 		Serial.println("Throttle");
 	}
 	else if (persXJoy < DEADBAND_NEG) 
 	{
+		VescUartSetCurrentBrake(((float)persXJoy / 100) * -3.0);
 		Serial.println("Break");
+	}
+
+	else
+	{
+		VescUartSetCurrent(0.0);
+		VescUartSetCurrentBrake(0.0);
 	}
 
 					
@@ -109,10 +119,11 @@ void loop()
 		Serial.println("recieved package: ");
 		Serial.print("valXJoy = "); Serial.print(remPack.valXJoy); Serial.print(" valYJoy = "); Serial.println(remPack.valYJoy);
 		Serial.print("LowerButton = ");Serial.print(remPack.valLowerButton); Serial.print(" UpperButton = "); Serial.println(remPack.valUpperButton);
+		Serial.print("Calcx: "); Serial.print(((float)persXJoy / 100) * 40.0);
 		recOK = false;
 	}
 	#endif
 	
-	
+	//delay(1000);
 	
 }

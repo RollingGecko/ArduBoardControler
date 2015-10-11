@@ -190,20 +190,20 @@ bool VescUartGetValue(bldcMeasure& values) {
 
 void VescUartSetCurrent(float current) {
 	int index = 0;
-	uint8_t payload[3];
+	uint8_t payload[5];
 		
 	payload[index++] = COMM_SET_CURRENT ;
-	buffer_append_int16(payload, (int)(current * 1000), &index);
-	PackSendPayload(payload, 3);
+	buffer_append_int32(payload, (int)(current * 1000), &index);
+	PackSendPayload(payload, 5);
 }
 
 void VescUartSetCurrentBrake(float brakeCurrent) {
 	int index = 0;
-	uint8_t payload[3];
+	uint8_t payload[5];
 
 	payload[index++] = COMM_SET_CURRENT_BRAKE;
-	buffer_append_int16(payload, (int)(brakeCurrent * 1000), &index);
-	PackSendPayload(payload, 3);
+	buffer_append_int32(payload, (int)(brakeCurrent * 1000), &index);
+	PackSendPayload(payload, 5);
 
 }
 
