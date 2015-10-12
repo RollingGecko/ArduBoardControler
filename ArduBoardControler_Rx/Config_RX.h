@@ -45,8 +45,13 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 //Setting for current control
 
-#define DEADBAND_POS 5
-#define DEADBAND_NEG -5
+#define DEADBAND_POS 1
+#define DEADBAND_NEG -1
+
+//Settings for remote
+
+#define TIMEOUTMAX	500
+
 //Define remote Package
 
 struct remotePackage {

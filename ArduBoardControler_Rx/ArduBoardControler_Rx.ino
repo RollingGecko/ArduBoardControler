@@ -22,12 +22,13 @@
 
 RF24 radio(CEPIN,CSPIN);
 
-//Define Remote Package
-
+//Define variables for remote
 remotePackage remPack;
 bool recOK = true;
+uint32_t lastTimeReceived = 0;
 
 struct bldcMeasure VescMeasuredValues;
+
 
 int8_t persXJoy = 0;
 
@@ -67,11 +68,11 @@ void loop()
 	//Getting Values from Vesc over UART
 
 	if (VescUartGetValue(VescMeasuredValues)) {
-		SerialPrint(VescMeasuredValues);
+	//	SerialPrint(VescMeasuredValues);
 	}
 	else
 	{
-		Serial.println("Failed to get data!");
+		Serial.println("Failed to get data from UART!");
 	}
 
 	//writing package to TX in AckPayload
@@ -85,18 +86,33 @@ void loop()
 		radio.read(&remPack, sizeof(remPack));
 		recOK = true;
 	}
-	#ifdef DEBUG
+	
+
+	uint32_t now = millis();
 
 	if (recOK == true)
 	{
-		DEBUGSERIAL.println("Received successfully!");
-		DEBUGSERIAL.println("recieved package: ");
+		lastTimeReceived = millis();
+		
+#ifdef DEBUG
+		DEBUGSERIAL.println("Received TX successfully!");
+		DEBUGSERIAL.println("Received package: ");
 		DEBUGSERIAL.print("valXJoy = "); DEBUGSERIAL.print(remPack.valXJoy); DEBUGSERIAL.print(" valYJoy = "); DEBUGSERIAL.println(remPack.valYJoy);
 		DEBUGSERIAL.print("LowerButton = "); DEBUGSERIAL.print(remPack.valLowerButton); DEBUGSERIAL.print(" UpperButton = "); DEBUGSERIAL.println(remPack.valUpperButton);
 		DEBUGSERIAL.print("Calcx: "); DEBUGSERIAL.print(((float)persXJoy / 100) * 40.0);
 		recOK = false;
-	}
 #endif
+	}
+	//Check if package were received within timeout
+	else if ((now - lastTimeReceived) > TIMEOUTMAX)
+		{
+			remPack.valXJoy = 512; //middle Position
+			remPack.valYJoy = 512;
+			remPack.valLowerButton = 0;
+			remPack.valLowerButton = 0;
+			DEBUGSERIAL.println("TX-signal lost!!");
+		}
+	
 
 	//Read the remote controls and control Vesc
 	//Read the x-joystick and controls motor current and break

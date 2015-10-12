@@ -134,7 +134,7 @@ int PackSendPayload(uint8_t* payload, int lenPay) {
 
 	//Sending package
 	SERIALIO.write(messageSend, count);
-	DEBUGSERIAL.println("Tx send.");
+	DEBUGSERIAL.println("UART package send.");
 	//Returns number of send bytes
 	return count;
 }
