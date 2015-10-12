@@ -40,6 +40,19 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 #define DEBUG
 
+//Define voltage controll setting
+
+#define LIPO
+
+#ifdef LIPO
+
+#define MINVOLRANGE 3.3
+#define MAXVOLRANGE 4.2
+#define MAXNUMBERCELLS	10
+
+#endif
+
+
 
 //Define remote Package
 

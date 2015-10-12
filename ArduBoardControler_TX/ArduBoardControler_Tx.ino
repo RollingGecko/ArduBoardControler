@@ -6,6 +6,7 @@
  * Author: AC
  */ 
 
+
 #include <SPI.h>
 
 //Using the nRF34 library from https://github.com/TMRh20/RF24
@@ -17,7 +18,7 @@
 #include "VescUart.h" //SerialPrint for received Data Package
 #endif
 #include "printf.h"
-
+#include "VoltageCheck.h"
 
 
 //
@@ -30,10 +31,13 @@ RF24 radio(9,10);
 
 remotePackage remPack;
 struct bldcMeasure VescMeasuredValues;
+struct calcValues calculatedValues;
+
 
 long failedCounter = 0;
 boolean sendOK = false;
 boolean recOK = false;
+
 
 void setup()
 {
@@ -45,11 +49,16 @@ void setup()
 	radio.openWritingPipe(pipe);
 	remPack.valLowerButton = 0;
 	remPack.valUpperButton = 1;
-		
+	Serial.println(calculatedValues.numberCells);
+
 }
 
 void loop()
 {
+	if (calculatedValues.numberCells == 0)
+	{
+		calculatedValues.numberCells = CountCells(VescMeasuredValues.inpVoltage);
+	}
 //read iputs
   remPack.valXJoy = analogRead(JOY_X);
   remPack.valYJoy = analogRead(JOY_Y);
@@ -85,6 +94,6 @@ if (recOK)
 	SerialPrint(VescMeasuredValues);
 }
 #endif
-	
+Serial.println(calculatedValues.numberCells);
 	delay(20);
 }

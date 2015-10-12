@@ -391,4 +391,8 @@ struct bldcMeasure {
 	long tachometer;
 	long tachometerAbs;
 }	;
+
+struct calcValues {
+	int numberCells = 0;
+};
 #endif /* DATATYPES_H_ */

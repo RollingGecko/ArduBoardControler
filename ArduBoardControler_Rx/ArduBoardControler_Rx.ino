@@ -47,11 +47,12 @@ void setup()
 	  radio.openReadingPipe(1,pipe);
 
 	  radio.startListening();
-	#ifdef DEBUG
-	
-	radio.printDetails();
-	
-	#endif
+	  //ToDo: leads to restart!?
+	//#ifdef DEBUG
+	//
+	//radio.printDetails();
+	//
+	//#endif
 
 	// For initial start 
 	
@@ -66,7 +67,7 @@ void loop()
 	//Getting Values from Vesc over UART
 
 	if (VescUartGetValue(VescMeasuredValues)) {
-		//SerialPrint(VescMeasuredValues);
+		SerialPrint(VescMeasuredValues);
 	}
 	else
 	{
@@ -86,14 +87,23 @@ void loop()
 	}
 	#ifdef DEBUG
 
+	if (recOK == true)
+	{
+		DEBUGSERIAL.println("Received successfully!");
+		DEBUGSERIAL.println("recieved package: ");
+		DEBUGSERIAL.print("valXJoy = "); DEBUGSERIAL.print(remPack.valXJoy); DEBUGSERIAL.print(" valYJoy = "); DEBUGSERIAL.println(remPack.valYJoy);
+		DEBUGSERIAL.print("LowerButton = "); DEBUGSERIAL.print(remPack.valLowerButton); DEBUGSERIAL.print(" UpperButton = "); DEBUGSERIAL.println(remPack.valUpperButton);
+		DEBUGSERIAL.print("Calcx: "); DEBUGSERIAL.print(((float)persXJoy / 100) * 40.0);
+		recOK = false;
+	}
+#endif
+
 	//Read the remote controls and control Vesc
 	//Read the x-joystick and controls motor current and break
 
 	//transform values read to int
 
 	persXJoy = map(remPack.valXJoy, 0, 1024, -100, 100);
-
-	Serial.println(persXJoy);
 
 	if (persXJoy > DEADBAND_POS )
 	{
@@ -113,16 +123,7 @@ void loop()
 	}
 
 					
-	if (recOK == true)
-	{
-		Serial.println("Received successfully!");
-		Serial.println("recieved package: ");
-		Serial.print("valXJoy = "); Serial.print(remPack.valXJoy); Serial.print(" valYJoy = "); Serial.println(remPack.valYJoy);
-		Serial.print("LowerButton = ");Serial.print(remPack.valLowerButton); Serial.print(" UpperButton = "); Serial.println(remPack.valUpperButton);
-		Serial.print("Calcx: "); Serial.print(((float)persXJoy / 100) * 40.0);
-		recOK = false;
-	}
-	#endif
+
 	
 	//delay(1000);
 	

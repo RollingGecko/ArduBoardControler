@@ -159,7 +159,7 @@ bool ProcessReadPacket(uint8_t* message, bldcMeasure& values, int len) {
 		values.inpVoltage = buffer_get_float16(message, 10.0, &ind);
 		values.ampHours = buffer_get_float32(message, 10000.0, &ind);
 		values.ampHoursCharged = buffer_get_float32(message, 10000.0, &ind);
-		ind += 9; //Skip 9 bit
+		ind += 8; //Skip 9 bit
 		values.tachometer = buffer_get_int32(message, &ind);
 		values.tachometerAbs = buffer_get_int32(message, &ind);
 		return true;
@@ -189,7 +189,7 @@ bool VescUartGetValue(bldcMeasure& values) {
 }
 
 void VescUartSetCurrent(float current) {
-	int index = 0;
+	int32_t index = 0;
 	uint8_t payload[5];
 		
 	payload[index++] = COMM_SET_CURRENT ;
@@ -198,7 +198,7 @@ void VescUartSetCurrent(float current) {
 }
 
 void VescUartSetCurrentBrake(float brakeCurrent) {
-	int index = 0;
+	int32_t index = 0;
 	uint8_t payload[5];
 
 	payload[index++] = COMM_SET_CURRENT_BRAKE;
