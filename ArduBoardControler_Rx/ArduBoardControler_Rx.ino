@@ -8,13 +8,12 @@
 
 #include <SPI.h>
 
+#include "Config.h"
 
 //Using the nRF34 library from https://github.com/TMRh20/RF24
 #include <nRF24L01.h>
 #include "RF24.h"
 #include "printf.h"
-
-#include "Config_RX.h"
 
 //Library for VESC UART
 #include "VescUart.h"
