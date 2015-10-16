@@ -4,7 +4,6 @@
 
 #ifndef _CONFIG_h
 #define _CONFIG_h
-#endif
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
@@ -27,6 +26,8 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 //Definition of Serial ports
 #define SERIALIO Serial1
 #define DEBUGSERIAL Serial
+
+#endif
 
 //**for Arduino Micro
 
