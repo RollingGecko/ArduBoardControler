@@ -10,7 +10,7 @@
 #include <SPI.h>
 
 //Using the nRF34 library from https://github.com/TMRh20/RF24
-#include "Config_TX.h"
+#include "Config.h"
 #include "nRF24L01.h"
 #include "RF24.h"
 #include "datatypes.h"
