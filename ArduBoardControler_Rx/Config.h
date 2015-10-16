@@ -2,8 +2,8 @@
 
 //Config RX
 
-#ifndef _CONFIG_RX_h
-#define _CONFIG_RX_h
+#ifndef _CONFIG_h
+#define _CONFIG_h
 #endif
 
 #if defined(ARDUINO) && ARDUINO >= 100

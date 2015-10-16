@@ -2,8 +2,8 @@
 
 // Config TX
 
-#ifndef _CONFIG_TX_h
-#define _CONFIG_TX_h
+#ifndef _CONFIG_h
+#define _CONFIG_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
@@ -64,6 +64,10 @@ struct remotePackage {
 	boolean	valLowerButton;
 	
 } ;
+
+struct calcValues {
+	int numberCells = 0;
+};
 
 #endif
 
