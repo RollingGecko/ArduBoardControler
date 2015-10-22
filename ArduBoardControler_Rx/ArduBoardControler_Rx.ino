@@ -105,27 +105,30 @@ void loop()
 	//Check if package were received within timeout
 	else if ((now - lastTimeReceived) > TIMEOUTMAX)
 		{
-			remPack.valXJoy = 512; //middle Position
-			remPack.valYJoy = 512;
+			remPack.valXJoy = 128; //middle Position
+			remPack.valYJoy = 128;
 			remPack.valLowerButton = 0;
 			remPack.valLowerButton = 0;
 			DEBUGSERIAL.println("TX-signal lost!!");
 		}
-	
+// Nunchuck mode	
+	VescUartSetNunchukValues(remPack);
 
+
+#ifdef SET_CURRENT_CONTROL
 	//Read the remote controls and control Vesc
-	//Read the x-joystick and controls motor current and break
+//Read the x-joystick and controls motor current and break
 
-	//transform values read to int
+//transform values read to int
 
-	persXJoy = map(remPack.valXJoy, 0, 1024, -100, 100);
+	persXJoy = map(remPack.valXJoy, 0, 255, -100, 100);
 
-	if (persXJoy > DEADBAND_POS )
+	if (persXJoy > DEADBAND_POS)
 	{
 		VescUartSetCurrent(((float)persXJoy / 100) * 40.0);
 		Serial.println("Throttle");
 	}
-	else if (persXJoy < DEADBAND_NEG) 
+	else if (persXJoy < DEADBAND_NEG)
 	{
 		VescUartSetCurrentBrake(((float)persXJoy / 100) * -3.0);
 		Serial.println("Break");
@@ -136,6 +139,8 @@ void loop()
 		VescUartSetCurrent(0.0);
 		VescUartSetCurrentBrake(0.0);
 	}
+#endif // SET_CURRENT_CONTROL
+
 
 					
 
