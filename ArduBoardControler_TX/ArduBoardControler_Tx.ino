@@ -6,7 +6,6 @@
  * Author: AC
  */ 
 
-
 #include <SPI.h>
 
 //Using the nRF34 library from https://github.com/TMRh20/RF24
@@ -43,13 +42,25 @@ void setup()
 {
 	Serial.begin(9600);
 	Serial.println("Tx Started");
+	//Initialization of Radio
+	
 	radio.begin();
 	radio.enableAckPayload();
 	radio.enableDynamicPayloads();
 	radio.openWritingPipe(pipe);
-	remPack.valLowerButton = 0;
-	remPack.valUpperButton = 1;
-	Serial.println(calculatedValues.numberCells);
+
+	//Initialization of buttons
+
+	pinMode(UPPER_BUTTON, INPUT_PULLUP);
+	//digitalWrite(UPPER_BUTTON, HIGH); // turn on pullup resistors
+
+	pinMode(LOWER_BUTTON, INPUT_PULLUP);
+	//digitalWrite(LOWER_BUTTON, HIGH); // turn on pullup resistors
+
+	//remPack.valLowerButton = 0;
+	//remPack.valUpperButton = 1;
+	//Some debug stuff
+	//Serial.println(calculatedValues.numberCells);
 
 }
 
@@ -60,9 +71,10 @@ void loop()
 		calculatedValues.numberCells = CountCells(VescMeasuredValues.inpVoltage);
 	}
 //read iputs
-  remPack.valXJoy = analogRead(JOY_X);
-  remPack.valYJoy = analogRead(JOY_Y);
-
+  remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
+  remPack.valYJoy = map(analogRead(JOY_Y), 0, 1023, 0, 255);
+  remPack.valLowerButton = !digitalRead(LOWER_BUTTON);
+  remPack.valUpperButton = !digitalRead(UPPER_BUTTON);
   //send data via radio to RX
   sendOK = radio.write( &remPack, sizeof(remPack) );
 
