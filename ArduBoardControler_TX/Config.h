@@ -32,8 +32,8 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #ifdef ARDUINO_AVR_NANO
 #define JOY_X				A0
 #define JOY_Y				A1
-#define UPPER_BUTTON		6	
-#define LOWER_BUTTON		5
+#define UPPER_BUTTON		2	
+#define LOWER_BUTTON		3
 #define DEBUGSERIAL Serial
 #define SERIALIO Serial
 #endif
