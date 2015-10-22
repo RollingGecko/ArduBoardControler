@@ -46,6 +46,8 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 //Setting for current control
 
+//#define SET_CURRENT_CONTROL
+
 #define DEADBAND_POS 1
 #define DEADBAND_NEG -1
 
