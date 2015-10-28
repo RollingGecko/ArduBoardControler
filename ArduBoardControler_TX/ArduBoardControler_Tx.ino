@@ -32,13 +32,18 @@
 #ifdef DEBUG
 #include "VescUart.h" //SerialPrint for received Data Package
 #endif
+#include <Adafruit_NeoPixel.h>
+#include "WS2812Color.h"
 #include "printf.h"
-#include "VoltageCheck.h"
+#include "LiPoCheck.h"
 
 
 //
 // Hardware configuration
 //
+//Set up LED WS2812
+
+Adafruit_NeoPixel Led = Adafruit_NeoPixel(NUM2812, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // Set up nRF24L01 radio on SPI bus plus pins 9 & 10
 
@@ -53,11 +58,41 @@ long failedCounter = 0;
 boolean sendOK = false;
 boolean recOK = false;
 
+void inline Vibrator();
+void inline Vibrator(int numberCycles);
+
 
 void setup()
-{
+{	
+
+	Led.begin();
+	Led.setBrightness(BRIGHTNESS);
+
+#ifdef DEBUG
 	Serial.begin(9600);
 	Serial.println("Tx Started");
+#endif
+
+	//Some light play at startup
+
+	Led.setPixelColor(0, COLOR_BLUE);
+	Led.show();
+	delay(300);
+	Led.setPixelColor(1, COLOR_GREEN);
+	Led.show();
+	delay(300);
+	Led.setPixelColor(2, COLOR_RED);
+	Led.show();
+	delay(300);
+	Led.setPixelColor(3, COLOR_ORANGE);
+	Led.show();
+	delay(300);
+	for (size_t i = 0; i < NUM2812; i++)
+	{
+		Led.setPixelColor(i, COLOR_OFF);
+	}
+	Led.show();
+
 	//Initialization of Radio
 	
 	radio.begin();
@@ -68,24 +103,66 @@ void setup()
 	//Initialization of buttons
 
 	pinMode(UPPER_BUTTON, INPUT_PULLUP);
-	//digitalWrite(UPPER_BUTTON, HIGH); // turn on pullup resistors
-
 	pinMode(LOWER_BUTTON, INPUT_PULLUP);
-	//digitalWrite(LOWER_BUTTON, HIGH); // turn on pullup resistors
 
-	//remPack.valLowerButton = 0;
-	//remPack.valUpperButton = 1;
-	//Some debug stuff
-	//Serial.println(calculatedValues.numberCells);
+	//Initialistation of Vibrator
+
+	pinMode(VIBRATOR_PIN, OUTPUT);
+
+	//Short feedback
+	//for (size_t i = 0; i < 3; i++)
+	//{
+	//	Vibrator();
+	//	delay(100);
+	//}
+
+	calculatedValues.numberCellsTx = CountCells((float) (analogRead(VOLTAGE_PIN))/ VOLTAGE_DIVISOR_TX);
+	DEBUGSERIAL.println(calculatedValues.numberCellsTx);
+	Vibrator(3);
 
 }
 
 void loop()
 {
-	if (calculatedValues.numberCells == 0)
+	if (calculatedValues.numberCellsVesc == 0)
 	{
-		calculatedValues.numberCells = CountCells(VescMeasuredValues.inpVoltage);
+		calculatedValues.numberCellsVesc = CountCells(VescMeasuredValues.inpVoltage);
 	}
+
+	
+
+//Read TxVoltage
+
+	
+	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
+
+	if (capTx > 80)
+	{
+		Led.setPixelColor(LED_TX, COLOR_GREEN);
+		Led.show();
+		Serial.println("1");
+	}
+	else if (capTx <= 80 && capTx > 60)
+	{
+		Led.setPixelColor(LED_TX, COLOR_YELLOWGREEN);
+		Led.show();
+		Serial.println("2");
+	}
+	else if (capTx <= 60 && capTx > 30)
+	{
+		Led.setPixelColor(LED_TX, COLOR_ORANGE);
+		Led.show();
+		Serial.println("3");
+	}
+	else if (capTx <= 30)
+	{
+		Led.setPixelColor(LED_TX, COLOR_RED);
+		Led.show();
+		Serial.println("4");
+	}
+
+	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(capTx);
+
 //read iputs
   remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
   remPack.valYJoy = map(analogRead(JOY_Y), 0, 1023, 0, 255);
@@ -109,19 +186,42 @@ if (sendOK)
 	Serial.println("Send successfully!");
 	Serial.print("Failed= ");Serial.println(failedCounter);
 	sendOK = false;
+	Led.setPixelColor(LED_TRANS, COLOR_GREEN);
+	Led.show();
+
   }
   else
   {
   //Serial.println("Send failed!");
   failedCounter++;
+  Led.setPixelColor(LED_TRANS, COLOR_RED);
+  Led.show();
   }
 
 if (recOK)
 {
 	Serial.println("Received values from Vesc:");
 	SerialPrint(VescMeasuredValues);
+	
 }
 #endif
-Serial.println(calculatedValues.numberCells);
+Serial.println(calculatedValues.numberCellsVesc);
 	delay(20);
+}
+
+void inline Vibrator() {
+
+	analogWrite(VIBRATOR_PIN, STRENGTH);
+	delay(PULS);
+	analogWrite(VIBRATOR_PIN, 0);
+}
+
+void inline Vibrator(int numberCycles) {
+
+	for (size_t i = 0; i < numberCycles; i++)
+	{
+		Vibrator();
+		delay(200);
+	}
+
 }
