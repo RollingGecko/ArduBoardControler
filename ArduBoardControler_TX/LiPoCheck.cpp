@@ -16,7 +16,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "VoltageCheck.h"
+#include "LiPoCheck.h"
 
 int CountCells(float voltage) {
 	
@@ -29,6 +29,33 @@ int CountCells(float voltage) {
 	}
 	return 0;
 }
+
+int CapCheckPerc(float voltage, int cells) {
+	float voltageCell = 0;
+	int ind = 0;
+
+	if (cells > 0)
+	{
+		voltageCell = (voltage / cells);
+	}
+
+	while (!(voltageCell<=lipoDc[0][ind+1] && voltageCell > lipoDc[0][ind])&& ind<=7)
+	{
+		ind++;
+	}
+	
+	if (voltageCell <= lipoDc[0][ind + 1] && voltageCell > lipoDc[0][ind])
+	{
+		float CapacPers = (((lipoDc[1][ind + 1] - lipoDc[1][ind])/ (lipoDc[0][ind + 1] - lipoDc[0][ind]))*(voltageCell - lipoDc[0][ind])) + lipoDc[1][ind];
+	//	int intCapacPers = (int)(CapacPers * 100);
+		return (CapacPers * 100);
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 
 
 

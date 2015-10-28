@@ -18,8 +18,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef _VOLTAGECHECK_h
-#define _VOLTAGECHECK_h
+#ifndef _LIPOCHECK_h
+#define _LIPOCHECK_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -33,7 +33,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #endif // !_CONFIG_h
 
+const float lipoDc[2][8] = { { 0.0, 3.670,3.740,3.790,3.820,3.900,4.030,4.200 } , {0.000, 0.100,0.200,0.300,0.400,0.600,0.800,1.000 } };
+
 int CountCells(float voltage);
+
+int CapCheckPerc(float voltage, int cells);
+
 
 #endif
 
