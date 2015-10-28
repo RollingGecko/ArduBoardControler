@@ -52,6 +52,9 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #define JOY_Y				A1
 #define UPPER_BUTTON		2	
 #define LOWER_BUTTON		3
+#define VOLTAGE_PIN				A2
+#define LED_PIN				4
+#define VIBRATOR_PIN		5
 #define DEBUGSERIAL Serial
 #define SERIALIO Serial
 #endif
@@ -65,10 +68,26 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #ifdef LIPO
 
 #define MINVOLRANGE 3.3
-#define MAXVOLRANGE 4.2
+#define MAXVOLRANGE 4.25
 #define MAXNUMBERCELLS	10
 
 #endif
+
+//TX Voltage measurement
+#define VOLTAGE_DIVISOR_TX	102.5
+
+//WS2812 settings
+
+#define NUM2812		4
+#define BRIGHTNESS	10
+#define LED_TX		0
+#define LED_TRANS	1	//Transmission
+#define LED_VOLTAGE	2
+
+//setting Vibrator
+
+#define STRENGTH	255	//0-255
+#define PULS		150 //ms
 
 
 
@@ -84,7 +103,8 @@ struct remotePackage {
 } ;
 
 struct calcValues {
-	int numberCells = 0;
+	int numberCellsVesc = 0;
+	int numberCellsTx = 0;
 };
 
 #endif
