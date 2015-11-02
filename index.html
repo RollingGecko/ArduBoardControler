@@ -38,23 +38,41 @@
 
 <p>Library <a href="https://github.com/RollingGecko/VescUartControl">https://github.com/RollingGecko/VescUartControl</a> required</p>
 
-<p>Documentation will be updated soon.</p>
+<p>To the VESC is a message send with joystick information and buttons pressed. VESC handels the message like a message needed for the nunchuk app. For deltails to the nunchuk app on the vesc please refer to:</p>
+
+<p><a href="http://vedder.se/2015/01/vesc-open-source-esc/">http://vedder.se/2015/01/vesc-open-source-esc/</a></p>
+
+<p>The firmware of the VESC must be adapted, so that the UART message can be handled. Pull request is following soon. So far use please my fork:</p>
+
+<p><a href="https://github.com/RollingGecko/bldc.git">https://github.com/RollingGecko/bldc.git</a></p>
 
 <h1>
 <a id="specification" class="anchor" href="#specification" aria-hidden="true"><span class="octicon octicon-link"></span></a>Specification</h1>
 
-<p>Coming soon</p>
+<ul>
+<li>Remote to VESC over nRF24 Radio</li>
+<li>Reading of X/Y joystick positions and 2 buttons and transmit to vesc</li>
+<li>Vesc is connected over UART to remote Ardunio nano</li>
+<li>All measured values from VESC like input voltage, current etc. is send to remote</li>
+<li>TX is master and RX slave: Sending direction  nRF24 from TX to RX. Feedback only over acknowledgement message</li>
+</ul>
 
 <h1>
 <a id="feature-list" class="anchor" href="#feature-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>Feature List</h1>
 
-<p>Coming soon</p>
+<ul>
+<li>
+</ul>
 
 <h1>
 <a id="todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>ToDo</h1>
 
-<p>Still a lot. :)
-Details comming soon</p>
+<ul>
+<li>Acceleration with pressed PID doesn´ t work. Also reverse. Problem must be on VESC site</li>
+<li>Remaining Capacity of battery on VESC site not implemented</li>
+<li>Vibration alarm at defined rest capacity state (in defined time intervalls)</li>
+<li>Displaying traveled km over 4 RGB LED </li>
+</ul>
 
 <h1>
 <a id="wish-list" class="anchor" href="#wish-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>Wish list</h1>
@@ -64,7 +82,7 @@ Details comming soon</p>
 <h1>
 <a id="implementation-example" class="anchor" href="#implementation-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Implementation Example</h1>
 
-<p>Based on a Nunchuk and a Arduino nano:</p>
+<p>Based on a Nunchuk and a Arduino nano. Beside that 4 2812 LED for state indication and alert vibrator are implemented. Joystick and buttons are from the original nunchuck.</p>
 
 <p><img src="https://raw.githubusercontent.com/RollingGecko/ArduBoardControler/gh-pages/images/Pictures/ReadyTX.jpg" alt=""></p>
 
