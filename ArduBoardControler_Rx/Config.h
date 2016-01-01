@@ -73,16 +73,16 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 #define TIMEOUTMAX	500
 
-//Define remote Package
-
-struct remotePackage {
-	
-	int		valXJoy;
-	int		valYJoy;
-	boolean	valUpperButton;
-	boolean	valLowerButton;
-	
-} ;
+////Define remote Package
+//
+//struct remotePackage {
+//	
+//	int		valXJoy;
+//	int		valYJoy;
+//	boolean	valUpperButton;
+//	boolean	valLowerButton;
+//	
+//} ; >> moved to datatypes.h in lib VescUartControl
 #endif
 
 
