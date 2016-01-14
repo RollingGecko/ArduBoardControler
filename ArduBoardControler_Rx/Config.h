@@ -45,11 +45,13 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #define SERIALIO Serial1
 #define DEBUGSERIAL Serial
 
+#define DEBUG
+
 #endif
 
-//**for Arduino Micro
+//**for Arduino Nano
 
-#ifdef ARDUINO_AVR_MICRO
+#ifdef ARDUINO_AVR_NANO
 
 //Pin definition
 
@@ -58,9 +60,10 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 //Definition of Serial ports
 #define SERIALIO Serial
+#define DEBUGSERIAL Serial
 #endif
 
-#define DEBUG
+
 
 //Setting for current control
 

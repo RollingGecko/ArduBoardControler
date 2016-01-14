@@ -56,7 +56,10 @@ void setup()
 	  //Initial for Radio
 	  SERIALIO.begin(115200);
 	  delay(1000);
-	  Serial.println("Nrf24L01 Receiver Starting");
+#ifdef DEBUG 
+	  DEBUGSERIAL.println("Nrf24L01 Receiver Starting");
+#endif // DEBUG 
+
 	  radio.begin();
 	  radio.enableAckPayload();
 	  radio.enableDynamicPayloads();
@@ -87,7 +90,10 @@ void loop()
 	}
 	else
 	{
-		Serial.println("Failed to get data from UART!");
+#ifdef DEBUG
+		DEBUGSERIAL.println("Failed to get data from UART!");
+#endif // DEBUG
+
 	}
 
 	//writing package to TX in AckPayload
@@ -125,7 +131,9 @@ void loop()
 			remPack.valYJoy = 128;
 			remPack.valLowerButton = 0;
 			remPack.valLowerButton = 0;
+#ifdef DEBUG
 			DEBUGSERIAL.println("TX-signal lost!!");
+#endif
 		}
 // Nunchuck mode	
 	VescUartSetNunchukValues(remPack);
