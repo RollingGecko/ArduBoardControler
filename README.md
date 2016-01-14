@@ -22,8 +22,7 @@ https://github.com/RollingGecko/bldc.git
 * 
 
 #ToDo
-* Acceleration with pressed PID doesn´ t work. Also reverse. Problem must be on VESC site
-* Remaining Capacity of battery on VESC site not implemented
+* Remaining Capacity of battery on VESC site not yet implemented
 * Vibration alarm at defined rest capacity state (in defined time intervalls)
 * Displaying traveled km over 4 RGB LED 
 
