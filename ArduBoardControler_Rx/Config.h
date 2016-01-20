@@ -63,6 +63,9 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #define DEBUGSERIAL Serial
 #endif
 
+//Settings for Nunchuk control
+
+#define SET_NUNCHUK_CONTROL
 
 
 //Setting for current control

@@ -136,8 +136,10 @@ void loop()
 #endif
 		}
 // Nunchuck mode	
-	VescUartSetNunchukValues(remPack);
 
+#ifdef SET_NUNCHUK_CONTROL
+	VescUartSetNunchukValues(remPack);
+#endif
 
 #ifdef SET_CURRENT_CONTROL
 	//Read the remote controls and control Vesc
@@ -150,12 +152,17 @@ void loop()
 	if (persXJoy > DEADBAND_POS)
 	{
 		VescUartSetCurrent(((float)persXJoy / 100) * 40.0);
-		Serial.println("Throttle");
+#ifdef DEBUG
+		DEBUGSERIAL.println("Throttle");
+#endif // DEBUG
+
 	}
 	else if (persXJoy < DEADBAND_NEG)
 	{
 		VescUartSetCurrentBrake(((float)persXJoy / 100) * -3.0);
-		Serial.println("Break");
+#ifdef DEBUG
+		DEBUGSERIAL.println("Break");
+#endif
 	}
 
 	else
