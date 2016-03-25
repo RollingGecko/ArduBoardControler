@@ -117,25 +117,32 @@ void loop()
 		
 #ifdef DEBUG
 		DEBUGSERIAL.println("Received TX successfully!");
-		DEBUGSERIAL.println("Received package: ");
-		DEBUGSERIAL.print("valXJoy = "); DEBUGSERIAL.print(remPack.valXJoy); DEBUGSERIAL.print(" valYJoy = "); DEBUGSERIAL.println(remPack.valYJoy);
-		DEBUGSERIAL.print("LowerButton = "); DEBUGSERIAL.print(remPack.valLowerButton); DEBUGSERIAL.print(" UpperButton = "); DEBUGSERIAL.println(remPack.valUpperButton);
-		DEBUGSERIAL.print("Calcx: "); DEBUGSERIAL.print(((float)persXJoy / 100) * 40.0);
-		recOK = false;
+		
 #endif
+		recOK = false;
 	}
 	//Check if package were received within timeout
 	else if ((now - lastTimeReceived) > TIMEOUTMAX)
 		{
 			remPack.valXJoy = 128; //middle Position
 			remPack.valYJoy = 128;
-			remPack.valLowerButton = 0;
-			remPack.valLowerButton = 0;
+			remPack.valUpperButton = false;
+			remPack.valLowerButton = false;
 #ifdef DEBUG
 			DEBUGSERIAL.println("TX-signal lost!!");
 #endif
 		}
-// Nunchuck mode	
+
+#ifdef DEBUG
+
+	DEBUGSERIAL.println("Received package / Package in main loop: ");
+	DEBUGSERIAL.print("valXJoy = "); DEBUGSERIAL.print(remPack.valXJoy); DEBUGSERIAL.print(" valYJoy = "); DEBUGSERIAL.println(remPack.valYJoy);
+	DEBUGSERIAL.print("LowerButton = "); DEBUGSERIAL.print(remPack.valLowerButton); DEBUGSERIAL.print(" UpperButton = "); DEBUGSERIAL.println(remPack.valUpperButton);
+	DEBUGSERIAL.print("Calcx: "); DEBUGSERIAL.println(((float)persXJoy / 100) * 40.0);
+
+#endif
+
+// Nunchuck mode
 
 #ifdef SET_NUNCHUK_CONTROL
 	VescUartSetNunchukValues(remPack);
