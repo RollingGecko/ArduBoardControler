@@ -28,6 +28,7 @@
 #include "Config.h"
 #include "nRF24L01.h"
 #include "RF24.h"
+#include "U8glib.h"
 #include "datatypes.h"
 #ifdef DEBUG
 #include "VescUart.h" //SerialPrint for received Data Package
@@ -49,6 +50,11 @@ Adafruit_NeoPixel Led = Adafruit_NeoPixel(NUM2812, LED_PIN, NEO_GRB + NEO_KHZ800
 
 RF24 radio(CEPIN,CSPIN);
 
+//Setup OLED display
+
+U8GLIB_SSD1306_128X64 u8g(OLED_CSPIN, OLED_CEPIN, MISO, MOSI, SCK);
+//U8GLIB_SSD1306_128X64 u8g(SCL, SDA, CS, DC, RES);
+
 remotePackage remPack;
 struct bldcMeasure VescMeasuredValues;
 struct calcValues calculatedValues;
@@ -60,6 +66,40 @@ boolean recOK = false;
 
 void inline Vibrator();
 void inline Vibrator(int numberCycles);
+
+//For Test Purpose:
+uint8_t offset = 0;
+
+void draw(void) {
+	// graphic commands to redraw the complete screen should be placed here 
+	u8g.setFont(u8g_font_unifont);
+	u8g.drawStr(0 + 0, 20 + 0, "Hello!");
+	u8g.drawStr(0 + 2, 20 + 16, "Hello!");
+
+	u8g.drawBox(0, 0, 3, 3);
+	u8g.drawBox(u8g.getWidth() - 6, 0, 6, 6);
+	u8g.drawBox(u8g.getWidth() - 9, u8g.getHeight() - 9, 9, 9);
+	u8g.drawBox(0, u8g.getHeight() - 12, 12, 12);
+}
+void rotate(void) {
+	static uint8_t dir = 0;
+	static unsigned long next_rotation = 0;
+
+	if (next_rotation < millis())
+	{
+		switch (dir) {
+		case 0: u8g.undoRotation(); break;
+		case 1: u8g.setRot90(); break;
+		case 2: u8g.setRot180(); break;
+		case 3: u8g.setRot270(); offset = (offset + 1) & 0x0f; break;
+		}
+
+		dir++;
+		dir &= 3;
+		next_rotation = millis();
+		next_rotation += 1000;
+	}
+}
 
 
 void setup()
@@ -207,6 +247,20 @@ if (recOK)
 #endif
 Serial.println(calculatedValues.numberCellsVesc);
 	delay(20);
+
+//For test putpose
+
+	rotate();
+
+	// picture loop
+	u8g.firstPage();
+	do {
+		draw();
+	} while (u8g.nextPage());
+
+	// rebuild the picture after some delay
+	delay(100);
+//END Test 
 }
 
 void inline Vibrator() {
@@ -225,3 +279,4 @@ void inline Vibrator(int numberCycles) {
 	}
 
 }
+

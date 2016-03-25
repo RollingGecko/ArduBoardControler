@@ -49,6 +49,12 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 //**for Arduino ATmega328p (Nano)
 
 #ifdef ARDUINO_AVR_NANO
+
+//SPI definition (for better readability)
+
+#define MOSI				11
+#define MISO				12
+#define SCK					13
 //Joystick and bottons
 #define JOY_X				A0
 #define JOY_Y				A1
@@ -72,6 +78,13 @@ IRQ		>					not connected*/
 //Definition of Serial
 #define DEBUGSERIAL			Serial
 #define SERIALIO			Serial
+/*OLED
+VCC		>					5V
+GND		>					GND
+DC		>					11	(MOSI)
+RES							13	(SCK)*/
+#define OLED_CEPIN			7	//(to SDA)
+#define OLED_CSPIN			8	
 #endif
 
 #define DEBUG
