@@ -42,21 +42,36 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #define JOY_Y				A1
 #define UPPER_BUTTON		6	
 #define LOWER_BUTTON		5
-
+#define CEPIN				9
+#define CSPIN				10
 #endif
 
 //**for Arduino ATmega328p (Nano)
 
 #ifdef ARDUINO_AVR_NANO
+//Joystick and bottons
 #define JOY_X				A0
 #define JOY_Y				A1
 #define UPPER_BUTTON		2	
 #define LOWER_BUTTON		3
-#define VOLTAGE_PIN				A2
+//nRF24: 
+/*nRF24	>					Ardunio nano
+------------------------
+VCC		>					3.3 V
+GND		>					GND
+MOSI	>					11
+MISO	>					12
+SCK		>					13
+IRQ		>					not connected*/
+#define CEPIN				9
+#define CSPIN				10
+//other Pins
+#define VOLTAGE_PIN			A2
 #define LED_PIN				4
 #define VIBRATOR_PIN		5
-#define DEBUGSERIAL Serial
-#define SERIALIO Serial
+//Definition of Serial
+#define DEBUGSERIAL			Serial
+#define SERIALIO			Serial
 #endif
 
 #define DEBUG
@@ -80,7 +95,7 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 #define NUM2812		4
 #define BRIGHTNESS	10
-#define LED_TX		0
+#define LED_TX		0	//TX-Voltage
 #define LED_TRANS	1	//Transmission
 #define LED_VOLTAGE	2
 

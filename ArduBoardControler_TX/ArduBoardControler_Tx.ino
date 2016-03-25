@@ -47,7 +47,7 @@ Adafruit_NeoPixel Led = Adafruit_NeoPixel(NUM2812, LED_PIN, NEO_GRB + NEO_KHZ800
 
 // Set up nRF24L01 radio on SPI bus plus pins 9 & 10
 
-RF24 radio(9,10);
+RF24 radio(CEPIN,CSPIN);
 
 remotePackage remPack;
 struct bldcMeasure VescMeasuredValues;
