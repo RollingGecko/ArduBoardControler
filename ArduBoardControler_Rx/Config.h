@@ -29,6 +29,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 	#include "WProgram.h"
 #endif
 
+//#define DEBUG
+
 // Definition of Pipe
  
 const uint64_t pipe = 0xE8E8F0F0E1LL;
@@ -45,7 +47,7 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #define SERIALIO Serial1
 #define DEBUGSERIAL Serial
 
-#define DEBUG
+
 
 #endif
 
@@ -55,9 +57,24 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 //Pin definition
 
+//nRF24: 
+/*nRF24	>	Ardunio nano
+------------------------
+VCC		>	3.3 V
+GND		>	GND
+MOSI	>	11
+MISO	>	12
+SCK		>	13
+IRQ		>	not connected*/
 #define CEPIN	9
 #define CSPIN	10
-
+/*VESC UART
+VESC		Arduino Nano
+VCC		>	5V			(black wire)	
+GND		>	GND			(white wire)
+TX		>	RX			(orange wire)
+RX		>	TX			(green wire)
+*/
 //Definition of Serial ports
 #define SERIALIO Serial
 #define DEBUGSERIAL Serial
