@@ -94,7 +94,7 @@ IRQ		>					not connected*/
 //WS2812 settings
 
 #define NUM2812		4
-#define BRIGHTNESS	10
+#define BRIGHTNESS	20
 #define LED_TX		0	//TX-Voltage
 #define LED_TRANS	1	//Transmission
 #define LED_VOLTAGE	2
