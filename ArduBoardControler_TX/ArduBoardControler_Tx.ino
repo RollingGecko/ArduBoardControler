@@ -40,7 +40,7 @@
 
 
 //
-// Hardware configuration
+// Hardware configuratio
 //
 //Set up LED WS2812
 
@@ -248,8 +248,8 @@ if (recOK)
 Serial.println(calculatedValues.numberCellsVesc);
 	delay(20);
 
+	
 //For test putpose
-
 	rotate();
 
 	// picture loop

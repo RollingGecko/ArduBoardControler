@@ -82,9 +82,9 @@ IRQ		>					not connected*/
 VCC		>					5V
 GND		>					GND
 DC		>					11	(MOSI)
-RES							13	(SCK)*/
+RES		>					13	(SCK)*/
 #define OLED_CEPIN			7	//(to SDA)
-#define OLED_CSPIN			8	
+#define OLED_CSPIN			8	//(to SCL)
 #endif
 
 #define DEBUG
