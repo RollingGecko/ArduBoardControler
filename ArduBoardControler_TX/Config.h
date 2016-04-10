@@ -78,11 +78,14 @@ IRQ		>					not connected*/
 //Definition of Serial
 #define DEBUGSERIAL			Serial
 #define SERIALIO			Serial
-/*OLED
-VCC		>					5V
-GND		>					GND
-DC		>					11	(MOSI)
-RES		>					13	(SCK)*/
+//OLED
+//for the OLED please check to correct pin setting by the used OLED driver in the u8glib
+//Here I use a SSD1306 with SW_SPI/*
+//VCC		>					5V
+//GND		>					GND
+#define OLED_MOSI			6	//(to DC)
+#define OLED_SCK			5	//(to RES)
+#define OLED_MISO			12	//not used
 #define OLED_CEPIN			7	//(to SDA)
 #define OLED_CSPIN			8	//(to SCL)
 #endif
