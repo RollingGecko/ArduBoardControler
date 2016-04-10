@@ -69,8 +69,39 @@ boolean recOK = false;
 void inline Vibrator();
 void inline Vibrator(int numberCycles);
 
+void BatCapIndLED(int led, float voltage, int numberCells) {
+//	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
+	int cap = CapCheckPerc(voltage, numberCells);
+	DEBUGSERIAL.print("voltag: "); DEBUGSERIAL.println(voltage);
+	DEBUGSERIAL.print("numberCells: "); DEBUGSERIAL.println(numberCells);
+	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(cap);
+	if (cap > 80)
+	{
+		Led.setPixelColor(led, COLOR_GREEN);
+		Led.show();
+		Serial.println("1");
+	}
+	else if (cap <= 80 && cap > 60)
+	{
+		Led.setPixelColor(led, COLOR_YELLOWGREEN);
+		Led.show();
+		Serial.println("2");
+	}
+	else if (cap <= 60 && cap > 30)
+	{
+		Led.setPixelColor(led, COLOR_ORANGE);
+		Led.show();
+		Serial.println("3");
+	}
+	else if (cap <= 30)
+	{
+		Led.setPixelColor(led, COLOR_RED);
+		Led.show();
+		Serial.println("4");
 //For Test Purpose:
 uint8_t offset = 0;
+	}
+}
 
 void DrawScreenMain(void) {
 		// graphic commands to redraw the complete screen should be placed here 
@@ -178,41 +209,45 @@ void loop()
 	if (calculatedValues.numberCellsVesc == 0)
 	{
 		calculatedValues.numberCellsVesc = CountCells(VescMeasuredValues.inpVoltage);
-	}
-
+		}
+	DEBUGSERIAL.print("calculatedNumberCellsVesc: "); DEBUGSERIAL.println(calculatedValues.numberCellsVesc);
 	
 
 //Read TxVoltage
 
 	
-	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
+	//float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
 
-	if (capTx > 80)
-	{
-		Led.setPixelColor(LED_TX, COLOR_GREEN);
-		Led.show();
-		Serial.println("1");
-	}
-	else if (capTx <= 80 && capTx > 60)
-	{
-		Led.setPixelColor(LED_TX, COLOR_YELLOWGREEN);
-		Led.show();
-		Serial.println("2");
-	}
-	else if (capTx <= 60 && capTx > 30)
-	{
-		Led.setPixelColor(LED_TX, COLOR_ORANGE);
-		Led.show();
-		Serial.println("3");
-	}
-	else if (capTx <= 30)
-	{
-		Led.setPixelColor(LED_TX, COLOR_RED);
-		Led.show();
-		Serial.println("4");
-	}
+	//if (capTx > 80)
+	//{
+	//	Led.setPixelColor(LED_TX, COLOR_GREEN);
+	//	Led.show();
+	//	Serial.println("1");
+	//}
+	//else if (capTx <= 80 && capTx > 60)
+	//{
+	//	Led.setPixelColor(LED_TX, COLOR_YELLOWGREEN);
+	//	Led.show();
+	//	Serial.println("2");
+	//}
+	//else if (capTx <= 60 && capTx > 30)
+	//{
+	//	Led.setPixelColor(LED_TX, COLOR_ORANGE);
+	//	Led.show();
+	//	Serial.println("3");
+	//}
+	//else if (capTx <= 30)
+	//{
+	//	Led.setPixelColor(LED_TX, COLOR_RED);
+	//	Led.show();
+	//	Serial.println("4");
+	//}
 
-	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(capTx);
+	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
+	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
+
+	DEBUGSERIAL.print("inpVoltage: "); DEBUGSERIAL.println(VescMeasuredValues.inpVoltage);
+//	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(capTx);
 
 //read iputs
   remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
