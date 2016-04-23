@@ -107,20 +107,25 @@ void DrawScreenMain(void) {
 		// graphic commands to redraw the complete screen should be placed here 
 		u8g.setFontPosTop();
 		u8g.setFont(u8g_font_courB08);
-		u8g.drawStr(0 + 0, 0, "80%");
+		u8g.setPrintPos(0, 0);
+		u8g.print(calculatedValues.TxPersCap);
+		u8g.drawStr(25, 0, "%");
 		u8g.drawStr(50, 0, "con");
-		u8g.drawStr(90, 0, "02Br");
+		u8g.setPrintPos(90, 0);
+		u8g.print(failedCounter);
+		u8g.drawStr(110, 0, "Err");
 		u8g.drawHLine(0, 9, 128);
 		u8g.setFont(u8g_font_courB14r);
 		u8g.setFontPosTop();
-		u8g.drawStr(0, 11, "25.5");
+		u8g.setPrintPos(0, 11);
+		u8g.print(calculatedValues.speed, 1);
 		u8g.setFont(u8g_font_courB08);
 		u8g.setFontPosTop();
 		u8g.drawStr(48, 11, "km/h");
 		u8g.setFont(u8g_font_courB14r);
 		u8g.setFontPosTop();
-		u8g.drawStr(0, 30, "09.5");
-
+		u8g.setPrintPos(0, 30);
+		u8g.print(calculatedValues.distanceTravel, 1);
 		u8g.setFont(u8g_font_courB08);
 		u8g.setFontPosTop();
 		u8g.drawStr(48, 30, "km");
@@ -128,7 +133,6 @@ void DrawScreenMain(void) {
 		u8g.setFontPosTop();
 		u8g.setPrintPos(78, 11);
 		u8g.print(VescMeasuredValues.avgMotorCurrent, 1);
-	//	u8g.drawStr(78, 11, "43.1");
 		u8g.setFont(u8g_font_courB08);
 		u8g.setFontPosTop();
 		u8g.drawStr(120, 11, "A");
@@ -141,8 +145,13 @@ void DrawScreenMain(void) {
 		u8g.setPrintPos(50, 64);
 		u8g.print(VescMeasuredValues.inpVoltage, 1);
 		u8g.drawStr(80, 64, "V");
-		u8g.drawStr(105, 64, "75%");
+		u8g.setPrintPos(103, 64);
+		u8g.print(calculatedValues.VescPersCap);
+		u8g.drawStr(120, 64, "%");
 }
+
+const float ratioRpmSpeed = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) * 60 / 1000000; //RPM to Km/h
+const float	rationRotDist = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) / 1000000; //RPM to travelled km
 
 void setup()
 {	
@@ -212,39 +221,14 @@ void loop()
 		}
 	DEBUGSERIAL.print("calculatedNumberCellsVesc: "); DEBUGSERIAL.println(calculatedValues.numberCellsVesc);
 	
-
-//Read TxVoltage
-
-	
-	//float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-
-	//if (capTx > 80)
-	//{
-	//	Led.setPixelColor(LED_TX, COLOR_GREEN);
-	//	Led.show();
-	//	Serial.println("1");
-	//}
-	//else if (capTx <= 80 && capTx > 60)
-	//{
-	//	Led.setPixelColor(LED_TX, COLOR_YELLOWGREEN);
-	//	Led.show();
-	//	Serial.println("2");
-	//}
-	//else if (capTx <= 60 && capTx > 30)
-	//{
-	//	Led.setPixelColor(LED_TX, COLOR_ORANGE);
-	//	Led.show();
-	//	Serial.println("3");
-	//}
-	//else if (capTx <= 30)
-	//{
-	//	Led.setPixelColor(LED_TX, COLOR_RED);
-	//	Led.show();
-	//	Serial.println("4");
-	//}
+	calculatedValues.VescPersCap = CapCheckPerc(VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
+	calculatedValues.TxPersCap = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
 
 	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
 	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
+
+	calculatedValues.speed = VescMeasuredValues.rpm * ratioRpmSpeed;
+	calculatedValues.distanceTravel = VescMeasuredValues.tachometer * rationRotDist;
 
 	DEBUGSERIAL.print("inpVoltage: "); DEBUGSERIAL.println(VescMeasuredValues.inpVoltage);
 //	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(capTx);
@@ -294,14 +278,14 @@ if (recOK)
 
 
 	
-	// picture loop
-	u8g.firstPage();
-	do {
-		DrawScreenMain();
-	} while (u8g.nextPage());
+	//// picture loop
+	//u8g.firstPage();
+	//do {
+	//	DrawScreenMain();
+	//} while (u8g.nextPage());
 
-	// rebuild the picture after some delay
-	delay(100);
+	//// rebuild the picture after some delay
+	//delay(100);
 //END Test 
 }
 

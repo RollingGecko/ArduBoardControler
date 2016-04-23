@@ -74,7 +74,7 @@ IRQ		>					not connected*/
 //other Pins
 #define VOLTAGE_PIN			A2
 #define LED_PIN				4
-#define VIBRATOR_PIN		5
+#define VIBRATOR_PIN		A3
 //Definition of Serial
 #define DEBUGSERIAL			Serial
 #define SERIALIO			Serial
@@ -85,7 +85,7 @@ IRQ		>					not connected*/
 //GND		>					GND
 #define OLED_MOSI			6	//(to DC)
 #define OLED_SCK			5	//(to RES)
-#define OLED_MISO			12	//not used
+#define OLED_MISO			20	//not used
 #define OLED_CEPIN			7	//(to SDA)
 #define OLED_CSPIN			8	//(to SCL)
 #endif
@@ -133,9 +133,18 @@ IRQ		>					not connected*/
 //	
 //} ; >> moved to datatypes.h in lib VescUartControl
 
+//Calculation Parameter
+
+#define DIA_WHEEL	76 //mm
+#define RATIO_GEAR	3.2
+
 struct calcValues {
-	int numberCellsVesc = 0;
-	int numberCellsTx = 0;
+	int		numberCellsVesc = 0;
+	int		numberCellsTx = 0;
+	int		VescPersCap = 0;
+	int		TxPersCap = 0;
+	float	speed = 0;
+	float	distanceTravel = 0;
 };
 
 #endif
