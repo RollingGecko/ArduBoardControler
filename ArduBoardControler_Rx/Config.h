@@ -94,7 +94,7 @@ RX		>	TX			(green wire)
 
 //Settings for remote
 
-#define TIMEOUTMAX	1000
+#define TIMEOUTMAX	500
 
 ////Define remote Package
 //
