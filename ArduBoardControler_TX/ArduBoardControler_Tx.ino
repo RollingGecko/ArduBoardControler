@@ -279,13 +279,13 @@ if (recOK)
 
 	
 	//// picture loop
-	//u8g.firstPage();
-	//do {
-	//	DrawScreenMain();
-	//} while (u8g.nextPage());
+	u8g.firstPage();
+	do {
+		DrawScreenMain();
+	} while (u8g.nextPage());
 
 	//// rebuild the picture after some delay
-	//delay(100);
+	delay(100);
 //END Test 
 }
 
