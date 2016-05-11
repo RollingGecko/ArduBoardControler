@@ -34,11 +34,14 @@
 //Library for VESC UART
 #include "VescUart.h"
 #include "datatypes.h"
+#include "local_datatypes.h"
+
+Definition of radio class
 
 RF24 radio(CEPIN,CSPIN);
 
 //Define variables for remote
-remotePackage remPack;
+struct remotePackage remPack;
 bool recOK = true;
 uint32_t lastTimeReceived = 0;
 
@@ -66,12 +69,7 @@ void setup()
 	  radio.openReadingPipe(1,pipe);
 
 	  radio.startListening();
-	  //ToDo: leads to restart!?
-	//#ifdef DEBUG
-	//
-	//radio.printDetails();
-	//
-	//#endif
+	 
 
 	// For initial start 
 	
@@ -149,6 +147,7 @@ void loop()
 #endif
 
 #ifdef SET_CURRENT_CONTROL
+	//ToDo: was only used for initial tests. Never realy tested while driving!! Needs to be checked if it should be used
 	//Read the remote controls and control Vesc
 //Read the x-joystick and controls motor current and break
 

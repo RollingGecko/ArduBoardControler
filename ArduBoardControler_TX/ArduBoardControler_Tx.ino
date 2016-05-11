@@ -30,6 +30,7 @@
 #include "RF24.h"
 #include "U8glib.h"
 #include "datatypes.h"
+#include "local_datatypes.h"
 #ifdef DEBUG
 #include "VescUart.h" //SerialPrint for received Data Package
 #endif
@@ -40,7 +41,7 @@
 
 
 //
-// Hardware configuratio
+// Hardware configuration
 //
 //Set up LED WS2812
 
@@ -57,111 +58,35 @@ RF24 radio(CEPIN,CSPIN);
 U8GLIB_SSD1306_128X64 u8g(OLED_CSPIN, OLED_CEPIN, OLED_MISO, OLED_MOSI, OLED_SCK);
 //U8GLIB_SSD1306_128X64 u8g(SCL, SDA, CS, DC, RES);
 
-remotePackage remPack;
+struct remotePackage remPack;
 struct bldcMeasure VescMeasuredValues;
 struct calcValues calculatedValues;
 
+// Declaration of global variables and const
 
 long failedCounter = 0;
 boolean sendOK = false;
 boolean recOK = false;
 
-void inline Vibrator();
-void inline Vibrator(int numberCycles);
-
-void BatCapIndLED(int led, float voltage, int numberCells) {
-//	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-	int cap = CapCheckPerc(voltage, numberCells);
-	DEBUGSERIAL.print("voltag: "); DEBUGSERIAL.println(voltage);
-	DEBUGSERIAL.print("numberCells: "); DEBUGSERIAL.println(numberCells);
-	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(cap);
-	if (cap > 80)
-	{
-		Led.setPixelColor(led, COLOR_GREEN);
-		Led.show();
-		Serial.println("1");
-	}
-	else if (cap <= 80 && cap > 60)
-	{
-		Led.setPixelColor(led, COLOR_YELLOWGREEN);
-		Led.show();
-		Serial.println("2");
-	}
-	else if (cap <= 60 && cap > 30)
-	{
-		Led.setPixelColor(led, COLOR_ORANGE);
-		Led.show();
-		Serial.println("3");
-	}
-	else if (cap <= 30)
-	{
-		Led.setPixelColor(led, COLOR_RED);
-		Led.show();
-		Serial.println("4");
-//For Test Purpose:
-uint8_t offset = 0;
-	}
-}
-
-void DrawScreenMain(void) {
-		// graphic commands to redraw the complete screen should be placed here 
-		u8g.setFontPosTop();
-		u8g.setFont(u8g_font_courB08);
-		u8g.setPrintPos(0, 0);
-		u8g.print(calculatedValues.TxPersCap);
-		u8g.drawStr(25, 0, "%");
-		u8g.drawStr(50, 0, "con");
-		u8g.setPrintPos(90, 0);
-		u8g.print(failedCounter);
-		u8g.drawStr(110, 0, "Err");
-		u8g.drawHLine(0, 9, 128);
-		u8g.setFont(u8g_font_courB14r);
-		u8g.setFontPosTop();
-		u8g.setPrintPos(0, 11);
-		u8g.print(calculatedValues.speed, 1);
-		u8g.setFont(u8g_font_courB08);
-		u8g.setFontPosTop();
-		u8g.drawStr(48, 11, "km/h");
-		u8g.setFont(u8g_font_courB14r);
-		u8g.setFontPosTop();
-		u8g.setPrintPos(0, 30);
-		u8g.print(calculatedValues.distanceTravel, 1);
-		u8g.setFont(u8g_font_courB08);
-		u8g.setFontPosTop();
-		u8g.drawStr(48, 30, "km");
-		u8g.setFont(u8g_font_courB14r);
-		u8g.setFontPosTop();
-		u8g.setPrintPos(78, 11);
-		u8g.print(VescMeasuredValues.avgMotorCurrent, 1);
-		u8g.setFont(u8g_font_courB08);
-		u8g.setFontPosTop();
-		u8g.drawStr(120, 11, "A");
-		u8g.drawHLine(0, 53, 128);
-		u8g.setFontPosBottom();
-		u8g.setFont(u8g_font_courB08);
-		u8g.setPrintPos(0, 64);
-		u8g.print(VescMeasuredValues.ampHours, 0);
-		u8g.drawStr(28, 64, "mAh");
-		u8g.setPrintPos(50, 64);
-		u8g.print(VescMeasuredValues.inpVoltage, 1);
-		u8g.drawStr(80, 64, "V");
-		u8g.setPrintPos(103, 64);
-		u8g.print(calculatedValues.VescPersCap);
-		u8g.drawStr(120, 64, "%");
-}
-
 const float ratioRpmSpeed = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) * 60 / 1000000; //RPM to Km/h
 const float	rationRotDist = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) / 1000000; //RPM to travelled km
 
+//function declaration
+
+void inline Vibrator();
+void inline Vibrator(int numberCycles);
+void BatCapIndLED(int led, float voltage, int numberCells);
+void DrawScreenMain(void);
+
 void setup()
 {	
-
+	//Led class is started and brightness is defined
 	Led.begin();
 	Led.setBrightness(BRIGHTNESS);
 
 #ifdef DEBUG
 	Serial.begin(9600);
-	Serial.println("Tx Started");
+//	Serial.println("Tx Started");
 #endif
 
 	//Some light play at startup
@@ -200,38 +125,34 @@ void setup()
 
 	pinMode(VIBRATOR_PIN, OUTPUT);
 
-	//Short feedback
-	//for (size_t i = 0; i < 3; i++)
-	//{
-	//	Vibrator();
-	//	delay(100);
-	//}
+	// number of cells for tx is calculates once
 
 	calculatedValues.numberCellsTx = CountCells((float) (analogRead(VOLTAGE_PIN))/ VOLTAGE_DIVISOR_TX);
-	DEBUGSERIAL.println(calculatedValues.numberCellsTx);
+
+	//Short feedback
+
 	Vibrator(3);
 
 }
 
 void loop()
 {
+	//calculates the number of cells of the board if not allready happen
+	//needs to be in the loop because it is not clear when board is powered uo
 	if (calculatedValues.numberCellsVesc == 0)
 	{
 		calculatedValues.numberCellsVesc = CountCells(VescMeasuredValues.inpVoltage);
 		}
-	DEBUGSERIAL.print("calculatedNumberCellsVesc: "); DEBUGSERIAL.println(calculatedValues.numberCellsVesc);
-	
+
+	//Calculation from measured values	
+	//ToDo: Mittelwertbildung
 	calculatedValues.VescPersCap = CapCheckPerc(VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
 	calculatedValues.TxPersCap = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-
-	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
-
 	calculatedValues.speed = VescMeasuredValues.rpm * ratioRpmSpeed;
 	calculatedValues.distanceTravel = VescMeasuredValues.tachometer * rationRotDist;
 
-	DEBUGSERIAL.print("inpVoltage: "); DEBUGSERIAL.println(VescMeasuredValues.inpVoltage);
-//	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(capTx);
+	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
+	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
 
 //read iputs
   remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
@@ -278,7 +199,12 @@ if (recOK)
 
 
 	
+<<<<<<< HEAD
 	//// picture loop
+=======
+// picture loop for oled display
+
+>>>>>>> DevProgress
 	u8g.firstPage();
 	do {
 		DrawScreenMain();
@@ -286,7 +212,10 @@ if (recOK)
 
 	//// rebuild the picture after some delay
 	delay(100);
+<<<<<<< HEAD
 //END Test 
+=======
+>>>>>>> DevProgress
 }
 
 void inline Vibrator() {
@@ -306,3 +235,83 @@ void inline Vibrator(int numberCycles) {
 
 }
 
+void BatCapIndLED(int led, float voltage, int numberCells) {
+	//	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
+	int cap = CapCheckPerc(voltage, numberCells);
+	DEBUGSERIAL.print("voltag: "); DEBUGSERIAL.println(voltage);
+	DEBUGSERIAL.print("numberCells: "); DEBUGSERIAL.println(numberCells);
+	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(cap);
+	if (cap > 80)
+	{
+		Led.setPixelColor(led, COLOR_GREEN);
+		Led.show();
+		Serial.println("1");
+	}
+	else if (cap <= 80 && cap > 60)
+	{
+		Led.setPixelColor(led, COLOR_YELLOWGREEN);
+		Led.show();
+		Serial.println("2");
+	}
+	else if (cap <= 60 && cap > 30)
+	{
+		Led.setPixelColor(led, COLOR_ORANGE);
+		Led.show();
+		Serial.println("3");
+	}
+	else if (cap <= 30)
+	{
+		Led.setPixelColor(led, COLOR_RED);
+		Led.show();
+		Serial.println("4");
+		//For Test Purpose:
+		uint8_t offset = 0;
+	}
+}
+
+void DrawScreenMain(void) {
+	// graphic commands to redraw the complete screen should be placed here 
+	u8g.setFontPosTop();
+	u8g.setFont(u8g_font_courB08);
+	u8g.setPrintPos(0, 0);
+	u8g.print(calculatedValues.TxPersCap);
+	u8g.drawStr(25, 0, "%");
+	u8g.drawStr(50, 0, "con");
+	u8g.setPrintPos(90, 0);
+	u8g.print(failedCounter);
+	u8g.drawStr(110, 0, "Err");
+	u8g.drawHLine(0, 9, 128);
+	u8g.setFont(u8g_font_courB14r);
+	u8g.setFontPosTop();
+	u8g.setPrintPos(0, 11);
+	u8g.print(calculatedValues.speed, 1);
+	u8g.setFont(u8g_font_courB08);
+	u8g.setFontPosTop();
+	u8g.drawStr(48, 11, "km/h");
+	u8g.setFont(u8g_font_courB14r);
+	u8g.setFontPosTop();
+	u8g.setPrintPos(0, 30);
+	u8g.print(calculatedValues.distanceTravel, 1);
+	u8g.setFont(u8g_font_courB08);
+	u8g.setFontPosTop();
+	u8g.drawStr(48, 30, "km");
+	u8g.setFont(u8g_font_courB14r);
+	u8g.setFontPosTop();
+	u8g.setPrintPos(78, 11);
+	u8g.print(VescMeasuredValues.avgMotorCurrent, 1);
+	u8g.setFont(u8g_font_courB08);
+	u8g.setFontPosTop();
+	u8g.drawStr(120, 11, "A");
+	u8g.drawHLine(0, 53, 128);
+	u8g.setFontPosBottom();
+	u8g.setFont(u8g_font_courB08);
+	u8g.setPrintPos(0, 64);
+	u8g.print(VescMeasuredValues.ampHours, 0);
+	u8g.drawStr(28, 64, "mAh");
+	u8g.setPrintPos(50, 64);
+	u8g.print(VescMeasuredValues.inpVoltage, 1);
+	u8g.drawStr(80, 64, "V");
+	u8g.setPrintPos(103, 64);
+	u8g.print(calculatedValues.VescPersCap);
+	u8g.drawStr(120, 64, "%");
+}
