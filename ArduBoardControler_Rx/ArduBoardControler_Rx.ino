@@ -36,7 +36,7 @@
 #include "datatypes.h"
 #include "local_datatypes.h"
 
-Definition of radio class
+//Definition of radio class
 
 RF24 radio(CEPIN,CSPIN);
 

@@ -199,12 +199,9 @@ if (recOK)
 
 
 	
-<<<<<<< HEAD
 	//// picture loop
-=======
 // picture loop for oled display
 
->>>>>>> DevProgress
 	u8g.firstPage();
 	do {
 		DrawScreenMain();
@@ -212,10 +209,9 @@ if (recOK)
 
 	//// rebuild the picture after some delay
 	delay(100);
-<<<<<<< HEAD
+
 //END Test 
-=======
->>>>>>> DevProgress
+
 }
 
 void inline Vibrator() {
