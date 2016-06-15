@@ -29,9 +29,17 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 	#include "WProgram.h"
 #endif
 
+//Decide here if you want to use an NRF-Module or direct serial communication to connect to VESC
+
+#define VESC_OVER_UART
+//#define VESC_OVER_NRF
+
+#ifdef VESC_OVER_NRF
 // Definition of Pipe
 
 const uint64_t pipe = 0xE8E8F0F0E1LL;
+
+#endif // VESC_OVER_NRF
 
 //Pin definition
 
@@ -60,6 +68,9 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #define JOY_Y				A1
 #define UPPER_BUTTON		2	
 #define LOWER_BUTTON		3
+
+
+#ifdef VESC_OVER_NRF
 //nRF24: 
 /*nRF24	>					Ardunio nano
 ------------------------
@@ -71,13 +82,17 @@ SCK		>					13
 IRQ		>					not connected*/
 #define CEPIN				9
 #define CSPIN				10
+#endif // VESC_OVER_NRF
 //other Pins
 #define VOLTAGE_PIN			A2
 #define LED_PIN				4
 #define VIBRATOR_PIN		A3
 //Definition of Serial
 #define DEBUGSERIAL			Serial
+#ifdef VESC_OVER_UART
 #define SERIALIO			Serial
+#define SERIALIO_BAUD		115200
+#endif // VESC_OVER_UART
 //OLED
 //for the OLED please check to correct pin setting by the used OLED driver in the u8glib
 //Here I use a SSD1306 with SW_SPI/*
@@ -90,8 +105,12 @@ IRQ		>					not connected*/
 #define OLED_CSPIN			8	//(to SCL)
 #endif
 
-#define DEBUG
+//#define DEBUG
 
+//Communication settings
+
+#define INTERVAL_GETTELEMETRY	500 //Interval for telemetry data in ms
+#define MAXMESSAGESIZE_IO	100
 //Define voltage controll setting
 
 #define LIPO
@@ -119,19 +138,6 @@ IRQ		>					not connected*/
 
 #define STRENGTH	255	//0-255
 #define PULS		150 //ms
-
-
-
-////Define remote Package
-//
-//struct remotePackage {
-//	
-//	int		valXJoy;
-//	int		valYJoy;
-//	boolean	valUpperButton;
-//	boolean	valLowerButton;
-//	
-//} ; >> moved to datatypes.h in lib VescUartControl
 
 //Calculation Parameter
 

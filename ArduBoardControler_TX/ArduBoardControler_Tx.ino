@@ -30,10 +30,10 @@
 #include "RF24.h"
 #include "U8glib.h"
 #include "datatypes.h"
-#include "local_datatypes.h"
-#ifdef DEBUG
-#include "VescUart.h" //SerialPrint for received Data Package
-#endif
+//#include "local_datatypes.h" 
+//#include "VescUart.h" 
+#include"VescIo.h"
+#include"VESC.h"
 #include <Adafruit_NeoPixel.h>
 #include "WS2812Color.h"
 #include "printf.h"
@@ -47,9 +47,18 @@
 
 Adafruit_NeoPixel Led = Adafruit_NeoPixel(NUM2812, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-// Set up nRF24L01 radio on SPI bus plus pins 9 & 10
+//Setup communication interface
 
-RF24 radio(CEPIN,CSPIN);
+#ifdef VESC_OVER_UART
+
+VescUartIo UartIo(&SERIALIO);	//Dependency injection for UART
+Vesc	vesc(&UartIo); //Dependency injection for communication interface
+
+#endif // VESC_OVER_UART
+
+//// Set up nRF24L01 radio
+
+//RF24 radio(CEPIN,CSPIN);
 
 //Setup OLED display
 
@@ -58,8 +67,10 @@ RF24 radio(CEPIN,CSPIN);
 U8GLIB_SSD1306_128X64 u8g(OLED_CSPIN, OLED_CEPIN, OLED_MISO, OLED_MOSI, OLED_SCK);
 //U8GLIB_SSD1306_128X64 u8g(SCL, SDA, CS, DC, RES);
 
-struct remotePackage remPack;
-struct bldcMeasure VescMeasuredValues;
+struct Vesc::remotePackage remPack;
+
+//struct remotePackage remPack;
+//struct bldcMeasure vesc.telemetryDataFromVesc.;
 struct calcValues calculatedValues;
 
 // Declaration of global variables and const
@@ -67,9 +78,14 @@ struct calcValues calculatedValues;
 long failedCounter = 0;
 boolean sendOK = false;
 boolean recOK = false;
+COMM_PACKET_ID lastReceivedMessageType = COMM_NON;
 
 const float ratioRpmSpeed = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) * 60 / 1000000; //RPM to Km/h
 const float	rationRotDist = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) / 1000000; //RPM to travelled km
+
+//timerVariables
+
+double timeLastTelemetryRequest = 0;
 
 //function declaration
 
@@ -85,9 +101,13 @@ void setup()
 	Led.setBrightness(BRIGHTNESS);
 
 #ifdef DEBUG
-	Serial.begin(9600);
-//	Serial.println("Tx Started");
+	DEBUGSERIAL.begin(9600);
 #endif
+	//Setup of communication interface
+#ifdef VESC_OVER_UART
+	SERIALIO.begin(SERIALIO_BAUD); 
+#endif // VESC_OVER_UART
+	UartIo.setMaxMessageSize(MAXMESSAGESIZE_IO); //limited by max Payload size of nRF 
 
 	//Some light play at startup
 
@@ -109,12 +129,12 @@ void setup()
 	}
 	Led.show();
 
-	//Initialization of Radio
-	
-	radio.begin();
-	radio.enableAckPayload();
-	radio.enableDynamicPayloads();
-	radio.openWritingPipe(pipe);
+	////Initialization of Radio
+	//
+	//radio.begin();
+	//radio.enableAckPayload();
+	//radio.enableDynamicPayloads();
+	//radio.openWritingPipe(pipe);
 
 	//Initialization of buttons
 
@@ -133,7 +153,7 @@ void setup()
 
 	Vibrator(3);
 
-}
+}//Setup End
 
 void loop()
 {
@@ -141,41 +161,60 @@ void loop()
 	//needs to be in the loop because it is not clear when board is powered uo
 	if (calculatedValues.numberCellsVesc == 0)
 	{
-		calculatedValues.numberCellsVesc = CountCells(VescMeasuredValues.inpVoltage);
+		calculatedValues.numberCellsVesc = CountCells(vesc.telemetryDataFromVesc.inpVoltage);
 		}
+	
+	if (millis() - timeLastTelemetryRequest >= INTERVAL_GETTELEMETRY)
+	{
+		timeLastTelemetryRequest = millis();
+		if (vesc.statusRequestGetTelemetryValues() )
+		{
+			failedCounter++;
+			//ToDo: Add event seperated error logging
+		}
+		vesc.sendRequestGetTelemetryValues();
+	}
 
-	//Calculation from measured values	
+	lastReceivedMessageType = vesc.ReceiveHandleMessage();
+
+	//Calculation from telemtry data
+
+
 	//ToDo: Mittelwertbildung
-	calculatedValues.VescPersCap = CapCheckPerc(VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
+	if (lastReceivedMessageType == COMM_GET_VALUES)
+	{
+		calculatedValues.VescPersCap = CapCheckPerc(vesc.telemetryDataFromVesc.inpVoltage, calculatedValues.numberCellsVesc);
+		calculatedValues.speed = vesc.telemetryDataFromVesc.rpm * ratioRpmSpeed;
+		calculatedValues.distanceTravel = vesc.telemetryDataFromVesc.tachometer * rationRotDist;
+		BatCapIndLED(LED_VOLTAGE, vesc.telemetryDataFromVesc.inpVoltage, calculatedValues.numberCellsVesc);
+	}
 	calculatedValues.TxPersCap = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-	calculatedValues.speed = VescMeasuredValues.rpm * ratioRpmSpeed;
-	calculatedValues.distanceTravel = VescMeasuredValues.tachometer * rationRotDist;
-
 	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
+	
 
 //read iputs
   remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
   remPack.valYJoy = map(analogRead(JOY_Y), 0, 1023, 0, 255);
+	//remPack.valXJoy = 128;
+ // remPack.valYJoy = 128;
   remPack.valLowerButton = !digitalRead(LOWER_BUTTON);
   remPack.valUpperButton = !digitalRead(UPPER_BUTTON);
-  //send data via radio to RX
-  sendOK = radio.write( &remPack, sizeof(remPack) );
+  //send data to RX
+ // sendOK = radio.write( &remPack, sizeof(remPack) );
+ sendOK = vesc.SetNunchukValues(remPack);
 
   //read Acknowledegement message from RX
 
-  while (radio.isAckPayloadAvailable())
-  {
-	  radio.read(&VescMeasuredValues, sizeof(VescMeasuredValues));
-	  recOK = true;
+  //while (radio.isAckPayloadAvailable())
+  //{
+	 // radio.read(&vesc.telemetryDataFromVesc., sizeof(vesc.telemetryDataFromVesc.));
+	 // recOK = true;
 
-  }
-  #ifdef DEBUG
+  //}
+
+  //#ifdef DEBUG
 if (sendOK)
   {
-	Serial.print("X= "); Serial.print(remPack.valXJoy);Serial.print(" Y= "); Serial.println(remPack.valYJoy);
-	Serial.println("Send successfully!");
-	Serial.print("Failed= ");Serial.println(failedCounter);
 	sendOK = false;
 	Led.setPixelColor(LED_TRANS, COLOR_GREEN);
 	Led.show();
@@ -183,23 +222,19 @@ if (sendOK)
   }
   else
   {
-  //Serial.println("Send failed!");
   failedCounter++;
   Led.setPixelColor(LED_TRANS, COLOR_RED);
   Led.show();
   }
 
+#ifdef DEBUG
 if (recOK)
 {
 	Serial.println("Received values from Vesc:");
-	SerialPrint(VescMeasuredValues);
-	
+	vesc.SerialPrint(DEBUGSERIAL);
 }
-#endif
+#endif //DEBUG
 
-
-	
-	//// picture loop
 // picture loop for oled display
 
 	u8g.firstPage();
@@ -208,11 +243,9 @@ if (recOK)
 	} while (u8g.nextPage());
 
 	//// rebuild the picture after some delay
-	delay(100);
+	//delay(200);
 
-//END Test 
-
-}
+} //End main loop
 
 void inline Vibrator() {
 
@@ -234,32 +267,31 @@ void inline Vibrator(int numberCycles) {
 void BatCapIndLED(int led, float voltage, int numberCells) {
 	//	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
 	int cap = CapCheckPerc(voltage, numberCells);
+#ifdef DEBUG
 	DEBUGSERIAL.print("voltag: "); DEBUGSERIAL.println(voltage);
 	DEBUGSERIAL.print("numberCells: "); DEBUGSERIAL.println(numberCells);
 	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(cap);
+#endif // DEBUG
+
 	if (cap > 80)
 	{
 		Led.setPixelColor(led, COLOR_GREEN);
 		Led.show();
-		Serial.println("1");
 	}
 	else if (cap <= 80 && cap > 60)
 	{
 		Led.setPixelColor(led, COLOR_YELLOWGREEN);
 		Led.show();
-		Serial.println("2");
 	}
 	else if (cap <= 60 && cap > 30)
 	{
 		Led.setPixelColor(led, COLOR_ORANGE);
 		Led.show();
-		Serial.println("3");
 	}
 	else if (cap <= 30)
 	{
 		Led.setPixelColor(led, COLOR_RED);
 		Led.show();
-		Serial.println("4");
 		//For Test Purpose:
 		uint8_t offset = 0;
 	}
@@ -294,7 +326,7 @@ void DrawScreenMain(void) {
 	u8g.setFont(u8g_font_courB14r);
 	u8g.setFontPosTop();
 	u8g.setPrintPos(78, 11);
-	u8g.print(VescMeasuredValues.avgMotorCurrent, 1);
+	u8g.print(vesc.telemetryDataFromVesc.avgMotorCurrent, 1);
 	u8g.setFont(u8g_font_courB08);
 	u8g.setFontPosTop();
 	u8g.drawStr(120, 11, "A");
@@ -302,10 +334,10 @@ void DrawScreenMain(void) {
 	u8g.setFontPosBottom();
 	u8g.setFont(u8g_font_courB08);
 	u8g.setPrintPos(0, 64);
-	u8g.print(VescMeasuredValues.ampHours, 0);
+	u8g.print(vesc.telemetryDataFromVesc.ampHours, 0);
 	u8g.drawStr(28, 64, "mAh");
 	u8g.setPrintPos(50, 64);
-	u8g.print(VescMeasuredValues.inpVoltage, 1);
+	u8g.print(vesc.telemetryDataFromVesc.inpVoltage, 1);
 	u8g.drawStr(80, 64, "V");
 	u8g.setPrintPos(103, 64);
 	u8g.print(calculatedValues.VescPersCap);
