@@ -23,11 +23,18 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifndef _CONFIG_h
 #define _CONFIG_h
 
+
+
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
 #else
 	#include "WProgram.h"
 #endif
+
+//Definition of Hardware
+
+#define OLED_USED			//define out if not used
+#define STATUS_LED_USED		//define out if not used
 
 // Definition of Pipe
 
@@ -78,6 +85,7 @@ IRQ		>					not connected*/
 //Definition of Serial
 #define DEBUGSERIAL			Serial
 #define SERIALIO			Serial
+#ifdef OLED_USED
 //OLED
 //for the OLED please check to correct pin setting by the used OLED driver in the u8glib
 //Here I use a SSD1306 with SW_SPI/*
@@ -88,6 +96,7 @@ IRQ		>					not connected*/
 #define OLED_MISO			20	//not used
 #define OLED_CEPIN			7	//(to SDA)
 #define OLED_CSPIN			8	//(to SCL)
+#endif //OLED_USED
 #endif
 
 #define DEBUG

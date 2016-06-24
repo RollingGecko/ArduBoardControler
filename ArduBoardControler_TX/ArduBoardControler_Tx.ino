@@ -28,14 +28,18 @@
 #include "Config.h"
 #include "nRF24L01.h"
 #include "RF24.h"
-#include "U8glib.h"
+#ifdef OLED_USED
+#include "U8glib.h"  
+#endif // OLED_USED
 #include "datatypes.h"
 #include "local_datatypes.h"
 #ifdef DEBUG
 #include "VescUart.h" //SerialPrint for received Data Package
 #endif
+#ifdef STATUS_LED_USED
 #include <Adafruit_NeoPixel.h>
 #include "WS2812Color.h"
+#endif //STATUS_LED_USED
 #include "printf.h"
 #include "LiPoCheck.h"
 
@@ -45,7 +49,9 @@
 //
 //Set up LED WS2812
 
+#ifdef STATUS_LED_USED
 Adafruit_NeoPixel Led = Adafruit_NeoPixel(NUM2812, LED_PIN, NEO_GRB + NEO_KHZ800);
+#endif // STATUS_LEDS_USED
 
 // Set up nRF24L01 radio on SPI bus plus pins 9 & 10
 
@@ -55,8 +61,10 @@ RF24 radio(CEPIN,CSPIN);
 
 //Please check the usage of the right constructor for your OLED driver in the u8glib. 
 //Here we use a SSD1306 with HW_SPI
+#ifdef OLED_USED
 U8GLIB_SSD1306_128X64 u8g(OLED_CSPIN, OLED_CEPIN, OLED_MISO, OLED_MOSI, OLED_SCK);
 //U8GLIB_SSD1306_128X64 u8g(SCL, SDA, CS, DC, RES);
+#endif // OLED_USED
 
 struct remotePackage remPack;
 struct bldcMeasure VescMeasuredValues;
@@ -81,13 +89,17 @@ void DrawScreenMain(void);
 void setup()
 {	
 	//Led class is started and brightness is defined
+#ifdef STATUS_LED_USED
 	Led.begin();
 	Led.setBrightness(BRIGHTNESS);
+#endif // STATUS_LED_USED
 
 #ifdef DEBUG
 	Serial.begin(9600);
 //	Serial.println("Tx Started");
 #endif
+
+#ifdef STATUS_LED_USED
 
 	//Some light play at startup
 
@@ -108,6 +120,8 @@ void setup()
 		Led.setPixelColor(i, COLOR_OFF);
 	}
 	Led.show();
+#endif // STATUS_LED_USED
+
 
 	//Initialization of Radio
 	
@@ -142,7 +156,7 @@ void loop()
 	if (calculatedValues.numberCellsVesc == 0)
 	{
 		calculatedValues.numberCellsVesc = CountCells(VescMeasuredValues.inpVoltage);
-		}
+	}
 
 	//Calculation from measured values	
 	//ToDo: Mittelwertbildung
@@ -150,68 +164,76 @@ void loop()
 	calculatedValues.TxPersCap = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
 	calculatedValues.speed = VescMeasuredValues.rpm * ratioRpmSpeed;
 	calculatedValues.distanceTravel = VescMeasuredValues.tachometer * rationRotDist;
+#ifdef STATUS_LED_USED
 
 	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
 	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
 
-//read iputs
-  remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
-  remPack.valYJoy = map(analogRead(JOY_Y), 0, 1023, 0, 255);
-  remPack.valLowerButton = !digitalRead(LOWER_BUTTON);
-  remPack.valUpperButton = !digitalRead(UPPER_BUTTON);
-  //send data via radio to RX
-  sendOK = radio.write( &remPack, sizeof(remPack) );
+#endif // STATUS_LED_USED
 
-  //read Acknowledegement message from RX
+	//read iputs
+	remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
+	remPack.valYJoy = map(analogRead(JOY_Y), 0, 1023, 0, 255);
+	remPack.valLowerButton = !digitalRead(LOWER_BUTTON);
+	remPack.valUpperButton = !digitalRead(UPPER_BUTTON);
+	//send data via radio to RX
+	sendOK = radio.write(&remPack, sizeof(remPack));
 
-  while (radio.isAckPayloadAvailable())
-  {
-	  radio.read(&VescMeasuredValues, sizeof(VescMeasuredValues));
-	  recOK = true;
+	//read Acknowledegement message from RX
 
-  }
-  #ifdef DEBUG
-if (sendOK)
-  {
-	Serial.print("X= "); Serial.print(remPack.valXJoy);Serial.print(" Y= "); Serial.println(remPack.valYJoy);
-	Serial.println("Send successfully!");
-	Serial.print("Failed= ");Serial.println(failedCounter);
-	sendOK = false;
-	Led.setPixelColor(LED_TRANS, COLOR_GREEN);
-	Led.show();
+	while (radio.isAckPayloadAvailable())
+	{
+		radio.read(&VescMeasuredValues, sizeof(VescMeasuredValues));
+		recOK = true;
 
-  }
-  else
-  {
-  //Serial.println("Send failed!");
-  failedCounter++;
-  Led.setPixelColor(LED_TRANS, COLOR_RED);
-  Led.show();
-  }
+	}
+#ifdef DEBUG
+	if (sendOK)
+	{
+		Serial.print("X= "); Serial.print(remPack.valXJoy); Serial.print(" Y= "); Serial.println(remPack.valYJoy);
+		Serial.println("Send successfully!");
+		Serial.print("Failed= "); Serial.println(failedCounter);
+		sendOK = false;
+#ifdef STATUS_LED_USED
+		Led.setPixelColor(LED_TRANS, COLOR_GREEN);
+		Led.show();
+#endif // STATUS_LED_USED
 
-if (recOK)
-{
-	Serial.println("Received values from Vesc:");
-	SerialPrint(VescMeasuredValues);
-	
-}
+
+	}
+	else
+	{
+		//Serial.println("Send failed!");
+		failedCounter++;
+#ifdef STATUS_LED_USED
+		Led.setPixelColor(LED_TRANS, COLOR_RED);
+		Led.show();
+
+#endif // STATUS_LED_USED  }
+
+		if (recOK)
+		{
+			Serial.println("Received values from Vesc:");
+			SerialPrint(VescMeasuredValues);
+
+		}
 #endif
 
 
-	
-	//// picture loop
-// picture loop for oled display
 
-	u8g.firstPage();
-	do {
-		DrawScreenMain();
-	} while (u8g.nextPage());
+		//// picture loop
+	// picture loop for oled display
 
-	//// rebuild the picture after some delay
-	delay(100);
+#ifdef OLED_USED
+		u8g.firstPage();
+		do {
+			DrawScreenMain();
+		} while (u8g.nextPage());
 
-//END Test 
 
+		//// rebuild the picture after some delay
+#endif // OLED_USED
+	}
 }
 
 void inline Vibrator() {
@@ -231,6 +253,7 @@ void inline Vibrator(int numberCycles) {
 
 }
 
+#ifdef STATUS_LED_USED
 void BatCapIndLED(int led, float voltage, int numberCells) {
 	//	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
 	int cap = CapCheckPerc(voltage, numberCells);
@@ -264,7 +287,10 @@ void BatCapIndLED(int led, float voltage, int numberCells) {
 		uint8_t offset = 0;
 	}
 }
+#endif // DEBUG
 
+
+#ifdef OLED_USED
 void DrawScreenMain(void) {
 	// graphic commands to redraw the complete screen should be placed here 
 	u8g.setFontPosTop();
@@ -311,3 +337,4 @@ void DrawScreenMain(void) {
 	u8g.print(calculatedValues.VescPersCap);
 	u8g.drawStr(120, 64, "%");
 }
+#endif // OLED_USED
