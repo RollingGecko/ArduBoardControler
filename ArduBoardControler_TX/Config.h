@@ -31,18 +31,22 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 	#include "WProgram.h"
 #endif
 
-//Definition of Hardware
+//Definition of Hardware used
 
 #define OLED_USED			//define out if not used
 #define STATUS_LED_USED		//define out if not used
 
-// Definition of Pipe
+//General settings:
+
+//#define DEBUG //use if debug information over serial required
+
+// Definition of Pipe for nRF24
 
 const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 //Pin definition
 
-//**for Mega2560
+//**for Mega2560 (old status!!)
 #ifdef __AVR_ATmega2560__ 
 
 #define JOY_X				A0
@@ -99,8 +103,6 @@ IRQ		>					not connected*/
 #endif //OLED_USED
 #endif
 
-#define DEBUG
-
 //Define voltage controll setting
 
 #define LIPO
@@ -123,29 +125,27 @@ IRQ		>					not connected*/
 #define LED_TX		0	//TX-Voltage
 #define LED_TRANS	1	//Transmission
 #define LED_VOLTAGE	2
+#define LED_FOUR	3
 
 //setting Vibrator
 
 #define STRENGTH	255	//0-255
 #define PULS		150 //ms
 
+//#define SEND_LR
 
+#define JOYSTICKBUTTON_DEADBAND		256
 
-////Define remote Package
-//
-//struct remotePackage {
-//	
-//	int		valXJoy;
-//	int		valYJoy;
-//	boolean	valUpperButton;
-//	boolean	valLowerButton;
-//	
-//} ; >> moved to datatypes.h in lib VescUartControl
 
 //Calculation Parameter
 
-#define DIA_WHEEL	76 //mm
+#define DIA_WHEEL	83 //mm
 #define RATIO_GEAR	3.2
+#define PULSE_REV   42  //Number of poles*3
+#define ERPM_REV    7   //Number of poles/2
+#define CORRECT_FACTOR_DISTANCE 0.825 //required out of practical tests.
+#define AVERAGE_CYCLE	100
+
 
 struct calcValues {
 	int		numberCellsVesc = 0;
@@ -153,7 +153,11 @@ struct calcValues {
 	int		VescPersCap = 0;
 	int		TxPersCap = 0;
 	float	speed = 0;
+	float	maxSpeed = 0;
 	float	distanceTravel = 0;
+	float	rpmAverage = 0;
+	float	currentAverage = 0;
+	float	maxCurrent = 0;
 };
 
 #endif

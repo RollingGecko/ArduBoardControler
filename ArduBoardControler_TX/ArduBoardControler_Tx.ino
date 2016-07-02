@@ -75,19 +75,57 @@ struct calcValues calculatedValues;
 long failedCounter = 0;
 boolean sendOK = false;
 boolean recOK = false;
+int averageCycles = 2;
 
-const float ratioRpmSpeed = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) * 60 / 1000000; //RPM to Km/h
-const float	rationRotDist = ((DIA_WHEEL * 3.14156) / RATIO_GEAR) / 1000000; //RPM to travelled km
+enum Display
+{
+	MIN_DISPLAY_ENUM,
+	DEF_SCR,
+	CURRENT_SCR,
+	SPEED_SCR,
+	CAP_SCR,
+	DISTANCE_SCR,
+	MAH_SCR,
+	MAXSPEED_SCR,
+	MAXCURRENT_SCR,
+	MAX_DISPLAY_ENUM
+};
+int numberDisplayShown = DEF_SCR;
+
+#ifndef SEND_LR
+
+enum JoyStatus {
+	center,
+    left,
+	right
+};
+
+JoyStatus joyStatus;
+
+int leftright = 127;
+
+#endif //SEND_LR
+
+
+const float ratioRpmSpeed = (DIA_WHEEL * 3.14156 * 60) / (ERPM_REV * RATIO_GEAR * 1000000);  //ERPM to Km/h
+const float   rationRotDist = ((DIA_WHEEL * 3.14156) / (PULSE_REV * RATIO_GEAR * 1000000))*CORRECT_FACTOR_DISTANCE; //Pulses to Km
 
 //function declaration
 
 void inline Vibrator();
 void inline Vibrator(int numberCycles);
 void BatCapIndLED(int led, float voltage, int numberCells);
+#ifdef OLED_USED
 void DrawScreenMain(void);
+void DrawScreenSingleValue(float value, char digits[3]);
+
+#endif // OLED_USED
 
 void setup()
 {	
+
+	
+
 	//Led class is started and brightness is defined
 #ifdef STATUS_LED_USED
 	Led.begin();
@@ -159,11 +197,36 @@ void loop()
 	}
 
 	//Calculation from measured values	
-	//ToDo: Mittelwertbildung
+	//Average calculation
+
+	if (averageCycles < AVERAGE_CYCLE)
+	{
+		calculatedValues.currentAverage = ((averageCycles - 1) * calculatedValues.currentAverage + VescMeasuredValues.avgMotorCurrent) / averageCycles;
+		calculatedValues.rpmAverage = ((averageCycles - 1) * calculatedValues.rpmAverage + VescMeasuredValues.rpm) / averageCycles;
+		averageCycles++;
+	}
+	else
+	{
+		calculatedValues.currentAverage = ((averageCycles - 1) * calculatedValues.currentAverage + VescMeasuredValues.avgMotorCurrent) / averageCycles;
+		calculatedValues.rpmAverage = ((averageCycles - 1) * calculatedValues.rpmAverage + VescMeasuredValues.rpm) / averageCycles;
+		averageCycles = 2;
+	}
+
 	calculatedValues.VescPersCap = CapCheckPerc(VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
 	calculatedValues.TxPersCap = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-	calculatedValues.speed = VescMeasuredValues.rpm * ratioRpmSpeed;
+	calculatedValues.speed = calculatedValues.rpmAverage * ratioRpmSpeed;
 	calculatedValues.distanceTravel = VescMeasuredValues.tachometer * rationRotDist;
+
+//Check for maxima
+	if (calculatedValues.speed > calculatedValues.maxSpeed)
+	{
+		calculatedValues.maxSpeed = calculatedValues.speed;
+	}
+
+	if (calculatedValues.currentAverage > calculatedValues.maxCurrent)
+	{
+		calculatedValues.maxCurrent = calculatedValues.currentAverage;
+	}
 #ifdef STATUS_LED_USED
 
 	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
@@ -172,7 +235,12 @@ void loop()
 #endif // STATUS_LED_USED
 
 	//read iputs
+#ifdef SEND_LR	
 	remPack.valXJoy = map(analogRead(JOY_X), 0, 1023, 0, 255);
+#else //if Joystick information of Y is not used for remote it can be used in remote
+	remPack.valXJoy = 127;
+	leftright = analogRead(JOY_X);
+#endif // END_LR
 	remPack.valYJoy = map(analogRead(JOY_Y), 0, 1023, 0, 255);
 	remPack.valLowerButton = !digitalRead(LOWER_BUTTON);
 	remPack.valUpperButton = !digitalRead(UPPER_BUTTON);
@@ -187,12 +255,14 @@ void loop()
 		recOK = true;
 
 	}
-#ifdef DEBUG
+
 	if (sendOK)
 	{
+#ifdef DEBUG
 		Serial.print("X= "); Serial.print(remPack.valXJoy); Serial.print(" Y= "); Serial.println(remPack.valYJoy);
 		Serial.println("Send successfully!");
 		Serial.print("Failed= "); Serial.println(failedCounter);
+#endif //DEBUG
 		sendOK = false;
 #ifdef STATUS_LED_USED
 		Led.setPixelColor(LED_TRANS, COLOR_GREEN);
@@ -210,16 +280,57 @@ void loop()
 		Led.show();
 
 #endif // STATUS_LED_USED  }
-
+	}
 		if (recOK)
 		{
+#ifdef DEBUG
 			Serial.println("Received values from Vesc:");
 			SerialPrint(VescMeasuredValues);
-
+#endif //DEBUG
 		}
-#endif
 
+//Read y Joystick as switch left right for display
 
+#ifndef SEND_LR
+		if (leftright < (512 - JOYSTICKBUTTON_DEADBAND) && joyStatus != right)
+		{
+			joyStatus = right;
+			numberDisplayShown++;
+			if (numberDisplayShown == MAX_DISPLAY_ENUM)
+			{
+				numberDisplayShown = DEF_SCR;
+			}
+			//Led.setPixelColor(LED_FOUR, COLOR_RED);
+			//Led.show();
+			//delay(500);
+			//Led.setPixelColor(LED_FOUR, COLOR_YELLOW);
+			//Led.show();
+			//do something
+		}
+
+		else if (leftright > (512 + JOYSTICKBUTTON_DEADBAND) && joyStatus != left)
+		{
+			joyStatus = left;
+
+			numberDisplayShown--;
+			if (numberDisplayShown == MIN_DISPLAY_ENUM)
+			{
+				numberDisplayShown = MAX_DISPLAY_ENUM - 1;
+			}
+
+			//Led.setPixelColor(LED_FOUR, COLOR_GREEN);
+			//Led.show();
+			//delay(500);
+			//Led.setPixelColor(LED_FOUR, COLOR_YELLOW);
+			//Led.show();
+			
+			
+		}
+		else if (leftright < (512+JOYSTICKBUTTON_DEADBAND) && leftright > (512-JOYSTICKBUTTON_DEADBAND))
+		{
+			joyStatus = center;
+		}
+#endif //SEND_LR
 
 		//// picture loop
 	// picture loop for oled display
@@ -227,14 +338,44 @@ void loop()
 #ifdef OLED_USED
 		u8g.firstPage();
 		do {
-			DrawScreenMain();
+			switch (numberDisplayShown)
+			{
+			case DEF_SCR:
+				DrawScreenMain();
+				break;
+			case CURRENT_SCR:
+				DrawScreenSingleValue("Current",calculatedValues.currentAverage, "A");
+				break;
+			case SPEED_SCR:
+				DrawScreenSingleValue("Speed",calculatedValues.speed, "kmh");
+				break;
+			case CAP_SCR:
+				DrawScreenSingleValue("Capacity", calculatedValues.VescPersCap, "%");
+				break;
+			case MAXSPEED_SCR:
+				DrawScreenSingleValue("Speed max", calculatedValues.maxSpeed, "kmh");
+				break;
+			case MAXCURRENT_SCR:
+				DrawScreenSingleValue("Current max", calculatedValues.maxCurrent, "A");
+				break;
+			case DISTANCE_SCR:
+				DrawScreenSingleValue("Distance", calculatedValues.distanceTravel, "km");
+				break;
+			case MAH_SCR:
+				DrawScreenSingleValue("used mAh", (VescMeasuredValues.ampHours/1000), "mAh");
+				break;
+			default:
+				break;
+			}
+			//DrawScreenMain();
 		} while (u8g.nextPage());
 
+		
 
 		//// rebuild the picture after some delay
 #endif // OLED_USED
 	}
-}
+
 
 void inline Vibrator() {
 
@@ -287,7 +428,7 @@ void BatCapIndLED(int led, float voltage, int numberCells) {
 		uint8_t offset = 0;
 	}
 }
-#endif // DEBUG
+#endif // STATUS_LED_USED
 
 
 #ifdef OLED_USED
@@ -320,7 +461,7 @@ void DrawScreenMain(void) {
 	u8g.setFont(u8g_font_courB14r);
 	u8g.setFontPosTop();
 	u8g.setPrintPos(78, 11);
-	u8g.print(VescMeasuredValues.avgMotorCurrent, 1);
+	u8g.print(calculatedValues.currentAverage, 1);
 	u8g.setFont(u8g_font_courB08);
 	u8g.setFontPosTop();
 	u8g.drawStr(120, 11, "A");
@@ -328,7 +469,7 @@ void DrawScreenMain(void) {
 	u8g.setFontPosBottom();
 	u8g.setFont(u8g_font_courB08);
 	u8g.setPrintPos(0, 64);
-	u8g.print(VescMeasuredValues.ampHours, 0);
+	u8g.print((VescMeasuredValues.ampHours/1000), 0);
 	u8g.drawStr(28, 64, "mAh");
 	u8g.setPrintPos(50, 64);
 	u8g.print(VescMeasuredValues.inpVoltage, 1);
@@ -336,5 +477,19 @@ void DrawScreenMain(void) {
 	u8g.setPrintPos(103, 64);
 	u8g.print(calculatedValues.VescPersCap);
 	u8g.drawStr(120, 64, "%");
+}
+
+void DrawScreenSingleValue(char titel[10], float value, char digits[3]) {
+	u8g.setFontPosTop();
+	u8g.setFont(u8g_font_courB14r);
+	u8g.setPrintPos(0, 6);
+	u8g.print(titel);
+	u8g.setFont(u8g_font_ncenB24r);
+	u8g.setFontPosTop();
+	u8g.setPrintPos(0, 25);
+	u8g.print(value, 1);
+	u8g.setFont(u8g_font_courB14r);
+	u8g.setFontPosTop();
+	u8g.drawStr(80, 28, digits);
 }
 #endif // OLED_USED
