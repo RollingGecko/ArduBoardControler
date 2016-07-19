@@ -362,7 +362,7 @@ void loop()
 				DrawScreenSingleValue("Distance", calculatedValues.distanceTravel, "km");
 				break;
 			case MAH_SCR:
-				DrawScreenSingleValue("used mAh", (VescMeasuredValues.ampHours/1000), "mAh");
+				DrawScreenSingleValue("used mAh", (VescMeasuredValues.ampHours*1000), "mAh");
 				break;
 			default:
 				break;
@@ -469,7 +469,7 @@ void DrawScreenMain(void) {
 	u8g.setFontPosBottom();
 	u8g.setFont(u8g_font_courB08);
 	u8g.setPrintPos(0, 64);
-	u8g.print((VescMeasuredValues.ampHours/1000), 0);
+	u8g.print((VescMeasuredValues.ampHours*1000), 0);
 	u8g.drawStr(28, 64, "mAh");
 	u8g.setPrintPos(50, 64);
 	u8g.print(VescMeasuredValues.inpVoltage, 1);
