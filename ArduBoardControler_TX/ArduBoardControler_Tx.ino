@@ -114,7 +114,7 @@ const float   rationRotDist = ((DIA_WHEEL * 3.14156) / (PULSE_REV * RATIO_GEAR *
 
 void inline Vibrator();
 void inline Vibrator(int numberCycles);
-void BatCapIndLED(int led, float voltage, int numberCells);
+void BatCapIndLED(int led, float voltage, int numberCells, int celltype);
 #ifdef OLED_USED
 void DrawScreenMain(void);
 void DrawScreenSingleValue(float value, char digits[3]);
@@ -179,7 +179,7 @@ void setup()
 
 	// number of cells for tx is calculates once
 
-	calculatedValues.numberCellsTx = CountCells((float) (analogRead(VOLTAGE_PIN))/ VOLTAGE_DIVISOR_TX);
+	calculatedValues.numberCellsTx = CountCells((float) ((analogRead(VOLTAGE_PIN))/ VOLTAGE_DIVISOR_TX),TXCELLTYPE);
 
 	//Short feedback
 
@@ -193,7 +193,7 @@ void loop()
 	//needs to be in the loop because it is not clear when board is powered uo
 	if (calculatedValues.numberCellsVesc == 0)
 	{
-		calculatedValues.numberCellsVesc = CountCells(VescMeasuredValues.inpVoltage);
+		calculatedValues.numberCellsVesc = CountCells(VescMeasuredValues.inpVoltage, DRIVECELLTYPE);
 	}
 
 	//Calculation from measured values	
@@ -212,8 +212,8 @@ void loop()
 		averageCycles = 2;
 	}
 
-	calculatedValues.VescPersCap = CapCheckPerc(VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
-	calculatedValues.TxPersCap = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
+	calculatedValues.VescPersCap = CapCheckPerc(VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc, DRIVECELLTYPE);
+	calculatedValues.TxPersCap = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx,TXCELLTYPE);
 	calculatedValues.speed = calculatedValues.rpmAverage * ratioRpmSpeed;
 	calculatedValues.distanceTravel = VescMeasuredValues.tachometer * rationRotDist;
 
@@ -229,8 +229,8 @@ void loop()
 	}
 #ifdef STATUS_LED_USED
 
-	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc);
+	BatCapIndLED(LED_TX, ((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx, TXCELLTYPE);
+	BatCapIndLED(LED_VOLTAGE, VescMeasuredValues.inpVoltage, calculatedValues.numberCellsVesc, DRIVECELLTYPE);
 
 #endif // STATUS_LED_USED
 
@@ -395,9 +395,9 @@ void inline Vibrator(int numberCycles) {
 }
 
 #ifdef STATUS_LED_USED
-void BatCapIndLED(int led, float voltage, int numberCells) {
+void BatCapIndLED(int led, float voltage, int numberCells, int celltype) {
 	//	float capTx = CapCheckPerc(((float)analogRead(VOLTAGE_PIN) / VOLTAGE_DIVISOR_TX), calculatedValues.numberCellsTx);
-	int cap = CapCheckPerc(voltage, numberCells);
+	int cap = CapCheckPerc(voltage, numberCells, celltype);
 	DEBUGSERIAL.print("voltag: "); DEBUGSERIAL.println(voltage);
 	DEBUGSERIAL.print("numberCells: "); DEBUGSERIAL.println(numberCells);
 	DEBUGSERIAL.print("Capacity: "); DEBUGSERIAL.println(cap);

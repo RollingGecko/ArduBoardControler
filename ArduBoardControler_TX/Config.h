@@ -103,17 +103,14 @@ IRQ		>					not connected*/
 #endif //OLED_USED
 #endif
 
-//Define voltage controll setting
+//Define voltage control setting
 
-#define LIPO
-
-#ifdef LIPO
-
-#define MINVOLRANGE 3.3
-#define MAXVOLRANGE 4.25
 #define MAXNUMBERCELLS	10
+#define LIPO	0
+#define LIION	1
 
-#endif
+#define TXCELLTYPE			LIPO
+#define DRIVECELLTYPE		LIPO	//OR LIION
 
 //TX Voltage measurement
 #define VOLTAGE_DIVISOR_TX	102.5
