@@ -42,7 +42,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 //const float lipoDc[2][8] = { { 0.0, 3.670,3.740,3.790,3.820,3.900,4.030,4.200 } , {0.000, 0.100,0.200,0.300,0.400,0.600,0.800,1.000 } };
 const float lipoDc[2][11] = { { 3.2, 3.680,3.740,3.780,3.810,3.850,3.870,3.960,4.02,4.100,4.200 } ,{ 0.000, 0.100,0.200,0.300,0.400,0.500,0.600,0.700,0.800,0.900,1.000 } };
-const float liionDc[2][6] = { {3.0, 3.6, 3.68, 3.75, 3.88, 4.2} ,{ 0.000, 0.200,0.400,0.600,0.800, 1.000 } }; //source: http://www.ibt-power.com/bkencel/Graphs/LiIonDischGph.JPG
+const float liionDc[2][7] = { {2.5, 3.4, 3.6, 3.68, 3.75, 3.88, 4.2} ,{ 0.000, 0.100, 0.200,0.400,0.600,0.800, 1.000} }; //source: http://www.ibt-power.com/bkencel/Graphs/LiIonDischGph.JPG
 int CountCells(float voltage, int celltype);
 
 int CapCheckPerc(float voltage, int cells, int celltype);
