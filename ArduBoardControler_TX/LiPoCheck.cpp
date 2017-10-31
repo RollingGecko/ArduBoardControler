@@ -57,7 +57,8 @@ int CapCheckPerc(float voltage, int cells, int celltype) {
 			return (100);
 		}
 
-		while (!(voltageCell <= lipoDc[0][ind + 1] && voltageCell > lipoDc[0][ind]) && ind <= (sizeof(lipoDc)/sizeof(*lipoDc)))
+		//while (!(voltageCell <= lipoDc[0][ind + 1] && voltageCell > lipoDc[0][ind]) && ind <= (sizeof(lipoDc)/sizeof(*lipoDc)))
+		while (!(voltageCell <= lipoDc[0][ind + 1] && voltageCell > lipoDc[0][ind]) && ind <= 10)
 		{
 			ind++;
 		}
@@ -86,7 +87,8 @@ int CapCheckPerc(float voltage, int cells, int celltype) {
 			return (100);
 		}
 
-		while (!(voltageCell <= liionDc[0][ind + 1] && voltageCell > liionDc[0][ind]) && ind <= (sizeof(liionDc) / sizeof(*liionDc)))
+		//while (!(voltageCell <= liionDc[0][ind + 1] && voltageCell > liionDc[0][ind]) && ind <= (sizeof(liionDc) / sizeof(*liionDc)))
+		hile(!(voltageCell <= liionDc[0][ind + 1] && voltageCell > liionDc[0][ind]) && ind <= 6)
 		{
 			ind++;
 		}
