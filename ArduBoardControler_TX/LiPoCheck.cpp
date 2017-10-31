@@ -88,7 +88,7 @@ int CapCheckPerc(float voltage, int cells, int celltype) {
 		}
 
 		//while (!(voltageCell <= liionDc[0][ind + 1] && voltageCell > liionDc[0][ind]) && ind <= (sizeof(liionDc) / sizeof(*liionDc)))
-		hile(!(voltageCell <= liionDc[0][ind + 1] && voltageCell > liionDc[0][ind]) && ind <= 6)
+		while(!(voltageCell <= liionDc[0][ind + 1] && voltageCell > liionDc[0][ind]) && ind <= 6)
 		{
 			ind++;
 		}
