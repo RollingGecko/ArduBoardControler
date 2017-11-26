@@ -54,9 +54,11 @@ void setup()
 {
 	
 	#ifdef DEBUG
+	  SetDebugSerialPort(&SERIALIO);
 	  DEBUGSERIAL.begin(115200);
 	#endif
 	  //Initial for Radio
+	  SetSerialPort(&SERIALIO);
 	  SERIALIO.begin(115200);
 	  delay(1000);
 #ifdef DEBUG 

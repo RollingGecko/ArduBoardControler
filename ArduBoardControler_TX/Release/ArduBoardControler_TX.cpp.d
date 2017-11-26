@@ -1,0 +1,29 @@
+C:\Users\AC\AppData\Local\Temp\VMBuilds\ArduBoardControler_TX\nano_atmega328\Release\ArduBoardControler_TX.cpp.o: \
+ C:\Users\AC\AppData\Local\Temp\VMBuilds\ArduBoardControler_TX\nano_atmega328\Release\ArduBoardControler_TX.cpp \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/Arduino.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/binary.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/WCharacter.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/WString.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/HardwareSerial.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/Stream.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/Print.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/Printable.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/USBAPI.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/Arduino.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\variants\eightanaloginputs/pins_arduino.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\variants\eightanaloginputs/../standard/pins_arduino.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\libraries\SPI\src/SPI.h \
+ C:\Users\AC\AppData\Local\Temp\VMBuilds\ArduBoardControler_TX\nano_atmega328\Release\Config.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\RF24/nRF24L01.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\RF24/RF24.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\RF24/RF24_config.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\U8glib/U8glib.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/Print.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\U8glib/utility/u8g.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\VescUartControl/datatypes.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\VescUartControl/local_datatypes.h \
+ F:\HiDrive\dev\BaseFiles\ARduino_1_5_1_libraries\libraries\Adafruit_NeoPixel-master/Adafruit_NeoPixel.h \
+ C:\Users\AC\AppData\Local\Temp\VMBuilds\ArduBoardControler_TX\nano_atmega328\Release\WS2812Color.h \
+ C:\Users\AC\AppData\Local\Temp\VMBuilds\ArduBoardControler_TX\nano_atmega328\Release\printf.h \
+ C:\Users\AC\AppData\Local\Temp\VMBuilds\ArduBoardControler_TX\nano_atmega328\Release\LiPoCheck.h \
+ C:\DEV\arduino-1.8.4\hardware\arduino\avr\cores\arduino/arduino.h
