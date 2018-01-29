@@ -1,3 +1,9 @@
+***************************************************************************************************************************
+
+The Project is discontinued. Sorry.
+
+***************************************************************************************************************************
+
 Arduino based remote with telemetry for VESC with nRF24
 
 A build tutorial (but without display) you can find in German in the Issue 5/17 of the make magazin: https://www.heise.de/make/artikel/eSkateboard-mit-VESC-Speedcontroller-3823391.html?artikelseite=4
